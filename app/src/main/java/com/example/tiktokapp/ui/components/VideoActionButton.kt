@@ -1,12 +1,15 @@
 package com.example.tiktokapp.ui.components
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 
@@ -16,14 +19,24 @@ fun VideoActionButton(
     text: String? = null,
     onClick: () -> Unit
 ) {
-    Row(
+    Column(
         modifier = Modifier
             .clickable { onClick() }
-            .padding(8.dp)
+            .padding(4.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Icon(imageVector = icon, contentDescription = null)
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = Color.White
+        )
         if (!text.isNullOrEmpty()) {
-            Text(text = text, modifier = Modifier.padding(start = 4.dp))
+            Text(
+                text = text,
+                color = Color.White,
+                modifier = Modifier.padding(top = 2.dp)
+            )
         }
     }
 }

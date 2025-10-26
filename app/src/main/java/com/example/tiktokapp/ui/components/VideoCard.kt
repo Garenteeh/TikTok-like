@@ -3,7 +3,6 @@ package com.example.tiktokapp.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -16,55 +15,42 @@ import com.example.tiktokapp.models.Video
 fun VideoCard(
     video: Video,
     modifier: Modifier = Modifier,
+    isPlaying: Boolean = false,
     actionButtons: @Composable () -> Unit
 ) {
     Box(modifier = modifier.fillMaxSize()) {
-        // TODO: Remplacer par le composant vidéo réel (ExoPlayer)
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = Color.Black
-        ) {}
 
-        Surface(
+        VideoPlayer(
+            videoUrl = video.url,
+            isPlaying = isPlaying,
+            modifier = Modifier.fillMaxSize()
+        )
+
+        Column(
             modifier = Modifier
-                .align(Alignment.TopStart)
-                .padding(12.dp),
-            color = Color.Black.copy(alpha = 0.4f),
-            shape = androidx.compose.material3.MaterialTheme.shapes.small
+                .align(Alignment.BottomStart)
+                .padding(start = 12.dp, bottom = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             Text(
                 text = video.user,
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                color = Color.White
+                color = Color.White,
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
             )
-        }
-
-        Surface(
-            modifier = Modifier
-                .align(Alignment.BottomStart)
-                .padding(12.dp),
-            color = Color.Black.copy(alpha = 0.4f),
-            shape = androidx.compose.material3.MaterialTheme.shapes.small
-        ) {
             Text(
                 text = video.title,
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                color = Color.White
+                color = Color.White,
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
             )
         }
 
         Box(
             modifier = Modifier
-                .align(Alignment.CenterEnd)
-                .padding(12.dp)
-                .background(
-                    color = Color.Black.copy(alpha = 0.3f),
-                    shape = RoundedCornerShape(16.dp)
-                )
-                .padding(8.dp)
+                .align(Alignment.BottomEnd)
+                .padding(horizontal = 8.dp, vertical = 12.dp)
         ) {
             Column(
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 actionButtons()

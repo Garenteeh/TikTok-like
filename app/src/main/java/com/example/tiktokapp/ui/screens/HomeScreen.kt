@@ -2,6 +2,7 @@ package com.example.tiktokapp.ui.screens
 
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -22,6 +23,8 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.remember
 
 @Composable
 fun HomeScreen(
@@ -31,41 +34,57 @@ fun HomeScreen(
     val videos by viewModel.videos.observeAsState(emptyList())
     val isLoading by viewModel.isLoading.observeAsState(false)
 
-    val spaceBetween = 0.dp
+    val configuration = LocalConfiguration.current
+    val screenHeight = configuration.screenHeightDp.dp
 
     val listState = rememberLazyListState()
     val flingBehavior = rememberSnapFlingBehavior(listState)
 
+    val visibleIndex by remember {
+        derivedStateOf {
+            val layoutInfo = listState.layoutInfo
+            val visibleItems = layoutInfo.visibleItemsInfo
+            if (visibleItems.isNotEmpty()) {
+
+                val viewportCenter = layoutInfo.viewportStartOffset + layoutInfo.viewportEndOffset / 2
+                val centerItem = visibleItems.minByOrNull {
+                    kotlin.math.abs((it.offset + it.size / 2) - viewportCenter)
+                }
+                centerItem?.index ?: 0
+            } else 0
+        }
+    }
+
+
     LazyColumn(
         state = listState,
         flingBehavior = flingBehavior,
-        verticalArrangement = Arrangement.spacedBy(spaceBetween),
-        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(0.dp),
+        modifier = modifier
     ) {
         itemsIndexed(videos) { index, video ->
             VideoCard(
                 video = video,
-                modifier = Modifier
-                    .then(Modifier)
-                    .padding(0.dp)
+                isPlaying = index == visibleIndex,
+                modifier = Modifier.height(screenHeight)
             ) {
                 VideoActionButton(
                     icon = Icons.Default.Favorite,
                     text = "${video.likes}",
-                    onClick = { /* TODO: Like */ }
+                    onClick = {}
                 )
                 VideoActionButton(
                     icon = Icons.Default.Email,
-                    text = "${video.comments.size}",
-                    onClick = { /* TODO: Show comments */ }
+                    text = "${video.totalCommentsCount()}",
+                    onClick = {}
                 )
                 VideoActionButton(
                     icon = Icons.Default.Share,
-                    onClick = { /* TODO: Share */ }
+                    onClick = {}
                 )
                 VideoActionButton(
                     icon = Icons.Default.Refresh,
-                    onClick = { /* TODO: Repost */ }
+                    onClick = {}
                 )
             }
 
@@ -76,9 +95,7 @@ fun HomeScreen(
 
         if (isLoading) {
             item {
-                CircularProgressIndicator(
-                    modifier = Modifier.padding(16.dp)
-                )
+                CircularProgressIndicator(modifier = Modifier.padding(16.dp))
             }
         }
     }

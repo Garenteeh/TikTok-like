@@ -7,42 +7,27 @@ class VideoRepository {
     fun getVideos(): List<Video> = listOf(
         Video(
             id = "1",
-            url = "",
-            title = "Big Buck Bunny",
+            url = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+            title = "Big Buck Bunny 🐰",
             user = "Alice",
             likes = 123,
             shares = 10,
             reposts = 5,
             comments = listOf(
-                Comment(
-                    id = "c1",
-                    user = "Bob",
-                    text = "Super vidéo !",
-                    replies = listOf(
-                        Comment(
-                            id = "c1r1",
-                            user = "Alice",
-                            text = "Merci !"
-                        )
-                    )
-                ),
-                Comment(
-                    id = "c2",
-                    user = "Charlie",
-                    text = "Trop drôle !"
-                )
+                Comment("c1", "Bob", "Super vidéo !", replies = listOf(
+                    Comment("c1r1", "Alice", "Merci !")
+                )),
+                Comment("c2", "Charlie", "Trop drôle !")
             )
         ),
         Video(
             id = "2",
-            url = "",
-            title = "Elephant's Dream",
+            url = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+            title = "Elephant's Dream 🐘",
             user = "Bob",
             likes = 87,
             shares = 7,
-            reposts = 2,
-            comments = listOf()
+            reposts = 2
         )
     )
 }
-

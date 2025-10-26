@@ -4,11 +4,15 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.tiktokapp.models.Comment
 import com.example.tiktokapp.models.Video
+import com.example.tiktokapp.repositories.VideoRepository
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class VideoListViewModel : ViewModel() {
+class VideoListViewModel(
+    private val repository: VideoRepository = VideoRepository()
+) : ViewModel() {
+
     private val _videos = MutableLiveData<List<Video>>(emptyList())
     val videos: LiveData<List<Video>> = _videos
 
@@ -16,7 +20,7 @@ class VideoListViewModel : ViewModel() {
     val isLoading: LiveData<Boolean> = _isLoading
 
     private var page = 0
-    private val pageSize = 10
+    private val pageSize = 5
 
     init {
         loadMoreVideos()
@@ -25,30 +29,24 @@ class VideoListViewModel : ViewModel() {
     fun loadMoreVideos() {
         if (_isLoading.value == true) return
         _isLoading.value = true
+
         viewModelScope.launch {
-            val newVideos = List(pageSize) { i ->
-                val index = page * pageSize + i
-                Video(
-                    id = index.toString(),
-                    url = "https://example.com/video$index.mp4",
-                    title = "Vidéo $index",
-                    user = "Utilisateur $index",
-                    likes = (0..1000).random(),
-                    shares = (0..100).random(),
-                    reposts = (0..50).random(),
-                    comments = List((0..10).random()) { j ->
-                        Comment(
-                            id = "$index-$j",
-                            user = "Commentateur $j",
-                            text = "Commentaire $j sur vidéo $index"
-                        )
-                    }
-                )
+            delay(800)
+
+            val allVideos = repository.getVideos()
+
+            val start = page * pageSize
+            val end = (start + pageSize).coerceAtMost(allVideos.size)
+
+            val newVideos = if (start < allVideos.size) {
+                allVideos.subList(start, end)
+            } else {
+                emptyList()
             }
+
             _videos.value = _videos.value.orEmpty() + newVideos
             page++
             _isLoading.value = false
         }
     }
 }
-
