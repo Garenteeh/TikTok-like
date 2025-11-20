@@ -4,7 +4,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 object RetrofitClient {
 
-    private const val BASE_URL = "https://raw.githubusercontent.com/Garenteeh/tiktok-videos/refs/heads/main/"
+    private const val BASE_URL = "https://young-wood-7919.bmg-laurent.workers.dev/"
 
 
     val api: WebService = Retrofit.Builder()

@@ -19,10 +19,6 @@ class VideoListViewModel(
     private val _isLoading = MutableLiveData(false)
     val isLoading: LiveData<Boolean> = _isLoading
 
-    private var allVideos: List<Video> = emptyList()
-    private var page = 0
-    private val pageSize = 5
-
     init {
         Log.d("VideoListViewModel", "ViewModel initialized")
         loadMoreVideos()
@@ -34,27 +30,15 @@ class VideoListViewModel(
             return
         }
 
-        Log.d("VideoListViewModel", "Loading more videos - page: $page")
         _isLoading.value = true
 
         viewModelScope.launch {
             try {
-                if (allVideos.isEmpty()) {
-                    Log.d("VideoListViewModel", "Fetching all videos from repository...")
-                    allVideos = repository.getRemoteVideos()
-                    Log.d("VideoListViewModel", "Total videos fetched: ${allVideos.size}")
-                }
+                val newVideos = repository.getRemoteVideos(50)
 
-                val start = page * pageSize
-                val end = (start + pageSize).coerceAtMost(allVideos.size)
-                val newPage = if (start < allVideos.size) allVideos.subList(start, end) else emptyList()
+                _videos.value = _videos.value.orEmpty() + newVideos
+                _isLoading.value = false
 
-                Log.d("VideoListViewModel", "Loading videos from index $start to $end (${newPage.size} videos)")
-
-                _videos.value = _videos.value.orEmpty() + newPage
-                Log.d("VideoListViewModel", "Total videos in list: ${_videos.value?.size}")
-
-                page++
             } catch (e: Exception) {
                 Log.e("VideoListViewModel", "Error loading videos", e)
             } finally {

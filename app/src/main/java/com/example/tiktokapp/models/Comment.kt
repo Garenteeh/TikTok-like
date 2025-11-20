@@ -3,7 +3,8 @@ package com.example.tiktokapp.models
 data class Comment(
     val id: String,
     val user: String,
-    val text: String,
-    val replies: List<Comment> = emptyList()
+    val message: String,
+    val timestamp: Long,
+    val replies: List<Comment>? = emptyList()
 )
 

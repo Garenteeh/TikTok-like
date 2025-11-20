@@ -33,12 +33,12 @@ fun VideoCard(
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             Text(
-                text = video.user,
+                text = video.user ?: "Unknown",
                 color = Color.White,
                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
             )
             Text(
-                text = video.title,
+                text = video.title ?: "No title",
                 color = Color.White,
                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
             )
