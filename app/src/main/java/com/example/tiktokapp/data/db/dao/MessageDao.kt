@@ -1,30 +1,20 @@
 package com.example.tiktokapp.data.db.dao
 
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
+import androidx.room.*
 import com.example.tiktokapp.data.db.entities.MessageEntity
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface MessageDao {
-
-    @Query("SELECT * FROM message ORDER BY timestamp DESC")
-    suspend fun getAllMessages(): List<MessageEntity>
-
-    @Query("SELECT * FROM message WHERE user_id = :id")
-    suspend fun getMessageBySubject(videoId: String): MessageEntity?
+    @Query("SELECT * FROM message WHERE subjectId = :subjectId ORDER BY timestamp DESC")
+    fun getForSubject(subjectId: String): Flow<List<MessageEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertMessage(video: MessageEntity)
+    suspend fun insert(message: MessageEntity)
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAll(videos: List<MessageEntity>)
+    @Query("DELETE FROM message WHERE id = :messageId")
+    suspend fun deleteById(messageId: String)
 
-    @Query("    val user: String,DELETE FROM messages")
-    suspend fun deleteAllMessages()
-
-    @Query("DELETE FROM messages WHERE id = :id")
-    suspend fun deleteMessageById(id: String)
+    @Query("DELETE FROM message WHERE subjectId = :messageId")
+    suspend fun deleteBySubject(messageId: String)
 }
-
