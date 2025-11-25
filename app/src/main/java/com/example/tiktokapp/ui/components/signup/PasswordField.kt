@@ -3,8 +3,13 @@ package com.example.tiktokapp.ui.components.signup
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Face
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -25,7 +30,7 @@ fun PasswordTextField(
     value: String,
     onValueChange: (String) -> Unit,
     label: String = "Mot de passe",
-    isError: Boolean,
+    isError: Boolean = false,
     errorMessage: String = ""
 ) {
     var passwordVisible by remember { mutableStateOf(false) }
@@ -34,6 +39,12 @@ fun PasswordTextField(
         value = value,
         onValueChange = onValueChange,
         label = label,
+        leadingIcon = {
+            Icon(
+                imageVector = Icons.Default.Lock,
+                contentDescription = null
+            )
+        },
         isError = isError,
         errorMessage = errorMessage,
         visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
@@ -42,10 +53,11 @@ fun PasswordTextField(
                 val iconResource = if (passwordVisible) R.drawable.close_eye else R.drawable.eye_open
                 val painter = painterResource(id = iconResource)
                 Icon(
-                    painter = painter, // Utilisez le paramètre 'painter'
-                    contentDescription = if (passwordVisible) "Masquer le mot de passe" else "Afficher le mot de passe"
+                    painter = painter,
+                    contentDescription = if (passwordVisible) "Masquer le mot de passe" else "Afficher le mot de passe",
+                    tint = LocalContentColor.current, // force la couleur de premier plan
+                    modifier = Modifier.size(24.dp) // assure une taille visible
                 )
-                Icon(painter = painter, contentDescription = "Toggle password visibility")
             }
         }
     )

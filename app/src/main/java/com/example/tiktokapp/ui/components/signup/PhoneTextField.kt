@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -30,12 +30,11 @@ fun PhoneTextField(
         onValueChange = onValueChange,
         label = label,
         isError = isError,
-        trailingIcon = {
-            IconButton (onClick = {
-
-            }) {
-                Icon(Icons.Filled.Phone, contentDescription = "Entrer un numéro de téléphone")
-            }
+        leadingIcon = {
+            Icon(
+                imageVector = Icons.Default.Phone,
+                contentDescription = null
+            )
         },
         errorMessage = errorMessage,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)

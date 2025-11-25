@@ -1,21 +1,29 @@
 package com.example.tiktokapp.ui.components.signup
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Face
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BaseTextField(
     value: String,
@@ -23,30 +31,59 @@ fun BaseTextField(
     label: String,
     isError: Boolean = false,
     errorMessage: String = "",
+    leadingIcon: (@Composable () -> Unit) = {},
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     trailingIcon: @Composable (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier) {
-        OutlinedTextField(
-            value = value,
-            onValueChange = onValueChange,
-            label = { Text(label) },
-            isError = isError,
-            singleLine = true,
-            visualTransformation = visualTransformation,
-            trailingIcon = trailingIcon,
-            keyboardOptions = keyboardOptions,
-            modifier = Modifier.fillMaxWidth()
-        )
 
-        if (isError && errorMessage.isNotBlank()) {
-            Spacer(Modifier.height(4.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    color = Color(0xFFF2F2F2),
+                    shape = RoundedCornerShape(12.dp)
+                )
+                .padding(horizontal = 12.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+
+//            leadingIcon()
+//
+//            Spacer(modifier = Modifier.width(10.dp))
+
+            OutlinedTextField(
+                value = value,
+                onValueChange = onValueChange,
+                label = { Text(label) },
+                isError = errorMessage.isNotEmpty(),
+                modifier = Modifier.weight(1f),
+                leadingIcon=leadingIcon,
+                trailingIcon= trailingIcon,
+                keyboardOptions = keyboardOptions,
+                visualTransformation = visualTransformation,
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent,
+                    disabledContainerColor = Color.Transparent,
+                    errorContainerColor = Color.Transparent,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    disabledIndicatorColor = Color.Transparent,
+                    errorIndicatorColor = Color.Transparent
+                )
+
+            )
+        }
+
+        if (isError) {
             Text(
                 text = errorMessage,
-                color = Color.Red,
-                style = MaterialTheme.typography.bodySmall
+                color = MaterialTheme.colorScheme.error,
+                fontSize = 12.sp,
+                modifier = Modifier.padding(start = 8.dp, top = 4.dp)
             )
         }
     }
@@ -61,6 +98,7 @@ fun BaseTextFieldPreview() {
                 BaseTextField(
                     value = "William",
                     onValueChange = {},
+                    leadingIcon = { Icon(imageVector = Icons.Default.Face, contentDescription = null) },
                     label = "Prénom",
                     isError = false
                 )
