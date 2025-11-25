@@ -1,10 +1,10 @@
 package com.example.tiktokapp.models
 
 data class PrivateMessage(
-    val id: int,
-    val timestamp: int,
-    var subject: int,
-    val user: string,
-    val content: string
+    val id: Int,
+    val timestamp: Int,
+    var subject: Int,
+    val user: String,
+    val content: String
 )
 

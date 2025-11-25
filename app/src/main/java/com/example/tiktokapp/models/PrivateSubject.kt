@@ -1,10 +1,10 @@
 package com.example.tiktokapp.models
 
 data class PrivateSubject(
-    val id: int,
-    var timestamp: int,
-    var sender: int,
-    val reciever: int,
+    val id: Int,
+    var timestamp: Int,
+    var sender: Int,
+    val reciever: Int,
     val title: String
 )
 
