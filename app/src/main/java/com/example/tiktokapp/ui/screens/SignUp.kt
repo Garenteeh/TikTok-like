@@ -48,7 +48,7 @@ fun SignupScreen() {
     var selectedCountry: Country? by remember { mutableStateOf<Country?>(null) }
 
     // États pour erreurs
-    var errors by remember { mutableStateOf(mapOf<String, String>()) }
+    var errors by remember { mutableStateOf(mutableMapOf<String, String>()) }
 
     val scrollState = rememberScrollState()
 
@@ -64,7 +64,10 @@ fun SignupScreen() {
         // First Name
         BaseTextField(
             value = firstName,
-            onValueChange = { firstName = it },
+            onValueChange = {
+                firstName = it
+                errors["firstName"] = ""
+            },
             label = "Prénom",
             errorMessage = errors["firstName"] ?: "",
             isError =  errors.containsKey("firstName"),
@@ -79,7 +82,10 @@ fun SignupScreen() {
         // Last Name
         BaseTextField(
             value = lastName,
-            onValueChange = { lastName = it },
+            onValueChange = {
+                lastName = it
+                errors["lastName"] = ""
+            },
             label = "Nom",
             errorMessage = errors["lastName"] ?: "",
             isError =  errors.containsKey("lastName"),
@@ -94,7 +100,10 @@ fun SignupScreen() {
         // Username
         BaseTextField(
             value = username,
-            onValueChange = { username = it },
+            onValueChange = {
+                username = it
+                errors["username"] = ""
+            },
             label = "Nom d'utilisateur",
             errorMessage = errors["username"] ?: "",
             isError =  errors.containsKey("username"),
@@ -109,7 +118,10 @@ fun SignupScreen() {
         // Email
         BaseTextField(
             value = email,
-            onValueChange = { email = it },
+            onValueChange = {
+                email = it
+                errors["email"] = ""
+            },
             label = "Email",
             errorMessage = errors["email"] ?: "",
             isError =  errors.containsKey("email"),
@@ -118,13 +130,17 @@ fun SignupScreen() {
                     imageVector = Icons.Default.Email,
                     contentDescription = null
                 )
-            }
+            },
+
         )
 
         // Phone Number
         PhoneTextField(
             value = phoneNumber,
-            onValueChange = { phoneNumber = it },
+            onValueChange = {
+                phoneNumber = it
+                errors["phone"] = ""
+           },
             label = "Numéro de téléphone",
             errorMessage = errors["phone"] ?: "",
             isError =  errors.containsKey("phone"),
@@ -133,7 +149,10 @@ fun SignupScreen() {
         // Password
         PasswordTextField (
             value = password,
-            onValueChange = { password = it },
+            onValueChange = {
+                password = it
+                errors["password"] = ""
+            },
             label = "Mot de passe",
             errorMessage = errors["password"] ?: "",
             isError =  errors.containsKey("password")
@@ -142,7 +161,10 @@ fun SignupScreen() {
 
         PasswordTextField (
             value = confirmPassword,
-            onValueChange = { confirmPassword = it },
+            onValueChange = {
+                confirmPassword = it
+                errors["confirmPassword"] = ""
+            },
             label = "Confirmation du Mot de passe",
             errorMessage = errors["confirmPassword"] ?: "",
             isError =  errors.containsKey("confirmPassword")
@@ -152,7 +174,10 @@ fun SignupScreen() {
         // Birth Date
         BirthDateTextField (
             value = birthDate,
-            onValueChange = { birthDate = it },
+            onValueChange = {
+                birthDate = it
+                errors["birthDate"] = ""
+            },
             error = errors["birthDate"] ?: "",
             isError =  errors.containsKey("birthDate")
         )
@@ -161,7 +186,10 @@ fun SignupScreen() {
         // Country Picker
         CountryPicker(
             selectedCountry = selectedCountry,
-            onCountrySelected = { selectedCountry = it },
+            onCountrySelected = {
+                selectedCountry = it
+                errors["country"] = ""
+            },
             countries = CountryRepository.countries,
             label = "Pays",
             isError = errors.containsKey("country"),
@@ -188,7 +216,7 @@ fun SignupScreen() {
 
                 if (validationErrors.isEmpty()) {
                     // Aucun problème : procéder à l'inscription
-                    errors = emptyMap()
+                    errors = mutableMapOf()
                     // TODO: envoyer les données au backend ou stocker localement
                 } else {
                     // Il y a des erreurs : les afficher

@@ -18,11 +18,15 @@ object UserValidation {
             else -> null
         }
     }
-    fun validateEmail(email: String): String? =
-        if (!emailRegex.matches(email)) "Email invalide" else null
 
-    fun validatePhone(phone: String): String? =
-        if (!phoneRegex.matches(phone)) "Numéro invalide" else null
+    fun validateRegexField(value: String, regex: Regex, fieldName: String): String? {
+        if(value.isBlank()) {
+            if(fieldName == "email") return "L'email est requis"
+            return "Le $fieldName est requis"
+        }
+        if(!regex.matches(value)) return ("Le $fieldName est invalide")
+        return null
+    }
 
     fun validatePassword(password: String): String? {
         if (password.isBlank()) return "Mot de passe requis"
@@ -100,16 +104,16 @@ object UserValidation {
         phone: String,
         country: String,
         birthDate: String
-    ): Map<String, String> {
+    ): MutableMap<String, String> {
         val errors = mutableMapOf<String, String>()
 
         validateRequiredField(firstName, "prénom", minLength = 2)?.let { errors["firstName"] = it }
         validateRequiredField(lastName, "nom", minLength = 2)?.let { errors["lastName"] = it }
         validateRequiredField(username, "pseudo", minLength = 2)?.let { errors["username"] = it }
         validateRequiredField(country, "pays")?.let { errors["country"] = it }
-        validateEmail(email)?.let { errors["email"] = it }
+        validateRegexField(email, emailRegex, "email")?.let { errors["email"] = it }
+        validateRegexField(phone, phoneRegex, "numéro de téléphone")?.let { errors["phone"] = it }
         validatePassword(password)?.let { errors["password"] = it }
-        validatePhone(phone)?.let { errors["phone"] = it }
         validateBirthDate(birthDate)?.let { errors["birthDate"] = it }
         if(confirmPassword.isEmpty()) errors["confirmPassword"] = "Confirmation du mot de passe requise"
         if(password != confirmPassword)
