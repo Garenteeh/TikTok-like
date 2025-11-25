@@ -1,4 +1,5 @@
-package com.example.tiktokapp.models
+package com.example.tiktokapp.domain.models
+
 
 data class Video(
     val id: String,
@@ -18,3 +19,4 @@ data class Video(
         return count(comments)
     }
 }
+

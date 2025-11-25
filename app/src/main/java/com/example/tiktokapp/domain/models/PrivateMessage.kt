@@ -1,4 +1,4 @@
-package com.example.tiktokapp.models
+package com.example.tiktokapp.domain.models
 
 data class PrivateMessage(
     val id: Int,
