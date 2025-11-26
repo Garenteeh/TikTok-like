@@ -338,3 +338,7 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.gitignore.io/api/java,linux,macos,windows,android,intellij,androidstudio
+.idea/deploymentTargetSelector.xml
+.idea/misc.xml
+.idea/studiobot.xml
+.idea/vcs.xml
