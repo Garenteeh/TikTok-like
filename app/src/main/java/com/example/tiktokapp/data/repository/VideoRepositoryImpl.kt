@@ -74,5 +74,24 @@ class VideoRepositoryImpl(
             getAllVideos()
         }
     }
+
+    /**
+     * Toggle like status for a video
+     */
+    override suspend fun toggleLike(videoId: String): Video? {
+        return try {
+            val video = videoDao.getVideoById(videoId) ?: return null
+            val newIsLiked = !video.isLiked
+            val newLikes = if (newIsLiked) video.likes + 1 else video.likes - 1
+
+            videoDao.updateLikeStatus(videoId, newIsLiked, newLikes)
+            Log.d("VideoRepositoryImpl", "Toggled like for video $videoId: isLiked=$newIsLiked, likes=$newLikes")
+
+            videoDao.getVideoById(videoId)?.toDomain()
+        } catch (e: Exception) {
+            Log.e("VideoRepositoryImpl", "Error toggling like", e)
+            null
+        }
+    }
 }
 

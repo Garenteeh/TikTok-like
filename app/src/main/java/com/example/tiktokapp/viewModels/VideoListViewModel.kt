@@ -94,4 +94,31 @@ class VideoListViewModel(
             }
         }
     }
+
+    /**
+     * Toggle like status for a video
+     */
+    fun toggleLike(videoId: String) {
+        viewModelScope.launch {
+            try {
+                val updatedVideo = repository.toggleLike(videoId)
+                if (updatedVideo != null) {
+                    // Update only likes and isLiked fields, preserve comments
+                    _videos.value = _videos.value?.map { video ->
+                        if (video.id == videoId) {
+                            video.copy(
+                                likes = updatedVideo.likes,
+                                isLiked = updatedVideo.isLiked
+                            )
+                        } else {
+                            video
+                        }
+                    }
+                    Log.d("VideoListViewModel", "Toggled like for video $videoId")
+                }
+            } catch (e: Exception) {
+                Log.e("VideoListViewModel", "Error toggling like", e)
+            }
+        }
+    }
 }

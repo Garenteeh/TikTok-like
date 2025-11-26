@@ -26,5 +26,8 @@ interface VideoDao {
 
     @Query("DELETE FROM videos WHERE id = :videoId")
     suspend fun deleteVideoById(videoId: String)
+
+    @Query("UPDATE videos SET isLiked = :isLiked, likes = :likes WHERE id = :videoId")
+    suspend fun updateLikeStatus(videoId: String, isLiked: Boolean, likes: Int)
 }
 

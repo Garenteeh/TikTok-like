@@ -45,7 +45,8 @@ fun VideoEntity.toDomain(): Video {
         likes = this.likes,
         shares = this.shares,
         reposts = this.reposts,
-        comments = emptyList() // Comments are not stored in local DB
+        comments = emptyList(), // Comments are not stored in local DB
+        isLiked = this.isLiked
     )
 }
 
@@ -58,7 +59,8 @@ fun Video.toEntity(): VideoEntity {
         user = this.user,
         likes = this.likes,
         shares = this.shares,
-        reposts = this.reposts
+        reposts = this.reposts,
+        isLiked = this.isLiked
     )
 }
 

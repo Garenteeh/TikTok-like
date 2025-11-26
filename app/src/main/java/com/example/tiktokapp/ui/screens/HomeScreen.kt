@@ -68,10 +68,26 @@ fun HomeScreen(
                 isPlaying = index == centered && !scrolling,
                 modifier = Modifier.height(screenHeight)
             ) {
-                VideoActionButton(Icons.Default.Favorite, "${video.likes}") {}
-                VideoActionButton(Icons.Default.Email, "${video.totalCommentsCount()}") {}
-                VideoActionButton(Icons.Default.Share) {}
-                VideoActionButton(Icons.Default.Refresh) {}
+                VideoActionButton(
+                    icon = Icons.Default.Favorite,
+                    text = video.formatCount(video.likes),
+                    isActive = video.isLiked,
+                    activeColor = androidx.compose.ui.graphics.Color.Red,
+                    onClick = { viewModel.toggleLike(video.id) }
+                )
+                VideoActionButton(
+                    icon = Icons.Default.Email,
+                    text = video.formatCount(video.totalCommentsCount()),
+                    onClick = {}
+                )
+                VideoActionButton(
+                    icon = Icons.Default.Share,
+                    onClick = {}
+                )
+                VideoActionButton(
+                    icon = Icons.Default.Refresh,
+                    onClick = {}
+                )
             }
 
             if (index >= videos.lastIndex - 2 && !isLoading) {

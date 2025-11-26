@@ -7,7 +7,7 @@ import com.example.tiktokapp.data.db.entities.VideoEntity
 
 @Database(
     entities = [VideoEntity::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
