@@ -1,0 +1,97 @@
+package com.example.tiktokapp.viewModels
+
+import android.app.Application
+import android.util.Log
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
+import com.example.tiktokapp.data.db.provider.DatabaseProvider
+import com.example.tiktokapp.data.repository.VideoRepositoryImpl
+import com.example.tiktokapp.domain.models.Video
+import com.example.tiktokapp.domain.repository.VideoRepository
+import kotlinx.coroutines.launch
+
+class VideoListViewModel(
+    application: Application
+) : AndroidViewModel(application) {
+
+    private val database = DatabaseProvider.provide(application)
+    private val repository: VideoRepository = VideoRepositoryImpl(
+        videoDao = database.videoDao()
+    )
+
+    private val _videos = MutableLiveData<List<Video>>(emptyList())
+    val videos: LiveData<List<Video>> = _videos
+
+    private val _isLoading = MutableLiveData(false)
+    val isLoading: LiveData<Boolean> = _isLoading
+
+    init {
+        Log.d("VideoListViewModel", "ViewModel initialized")
+        loadVideosFromDb()
+        loadMoreVideos()
+    }
+
+    /**
+     * Load videos from local database first
+     */
+    private fun loadVideosFromDb() {
+        viewModelScope.launch {
+            try {
+                val localVideos = repository.getAllVideos()
+                if (localVideos.isNotEmpty()) {
+                    _videos.value = localVideos
+                    Log.d("VideoListViewModel", "Loaded ${localVideos.size} videos from DB")
+                }
+            } catch (e: Exception) {
+                Log.e("VideoListViewModel", "Error loading videos from DB", e)
+            }
+        }
+    }
+
+    /**
+     * Load more videos from remote API and save to DB
+     */
+    fun loadMoreVideos() {
+        if (_isLoading.value == true) {
+            Log.d("VideoListViewModel", "Already loading, skipping...")
+            return
+        }
+
+        _isLoading.value = true
+
+        viewModelScope.launch {
+            try {
+                val newVideos = repository.fetchRemoteVideos(50)
+                _videos.value = newVideos
+                Log.d("VideoListViewModel", "Loaded ${newVideos.size} new videos")
+            } catch (e: Exception) {
+                Log.e("VideoListViewModel", "Error loading videos", e)
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    /**
+     * Refresh videos - clear DB and fetch new ones
+     */
+    fun refreshVideos() {
+        if (_isLoading.value == true) return
+
+        _isLoading.value = true
+
+        viewModelScope.launch {
+            try {
+                val videos = repository.refreshVideos(50)
+                _videos.value = videos
+                Log.d("VideoListViewModel", "Refreshed with ${videos.size} videos")
+            } catch (e: Exception) {
+                Log.e("VideoListViewModel", "Error refreshing videos", e)
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+}
