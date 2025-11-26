@@ -1,7 +1,4 @@
-package com.example.tiktokapp.models
-
-import android.icu.text.DateFormat
-import java.util.Date
+package com.example.tiktokapp.data.utils
 
 object UserValidation {
 
