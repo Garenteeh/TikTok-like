@@ -20,6 +20,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.tiktokapp.domain.models.Video
+import com.example.tiktokapp.ui.components.CommentsBottomSheet
 import com.example.tiktokapp.ui.components.VideoActionButton
 import com.example.tiktokapp.ui.components.VideoCard
 import com.example.tiktokapp.viewModels.VideoListViewModel
@@ -31,6 +33,9 @@ fun HomeScreen(
 ) {
     val videos by viewModel.videos.observeAsState(emptyList())
     val isLoading by viewModel.isLoading.observeAsState(false)
+
+    // État pour gérer l'ouverture des commentaires
+    var selectedVideoForComments by remember { mutableStateOf<Video?>(null) }
 
     LaunchedEffect(videos) {
         Log.d("HomeScreen", "Videos updated: ${videos.size} videos")
@@ -78,7 +83,7 @@ fun HomeScreen(
                 VideoActionButton(
                     icon = Icons.Default.Email,
                     text = video.formatCount(video.totalCommentsCount()),
-                    onClick = {}
+                    onClick = { selectedVideoForComments = video }
                 )
                 VideoActionButton(
                     icon = Icons.Default.Share,
@@ -100,5 +105,13 @@ fun HomeScreen(
                 CircularProgressIndicator(Modifier.padding(16.dp))
             }
         }
+    }
+
+    // BottomSheet pour afficher les commentaires
+    selectedVideoForComments?.let { video ->
+        CommentsBottomSheet(
+            comments = video.comments ?: emptyList(),
+            onDismiss = { selectedVideoForComments = null }
+        )
     }
 }

@@ -103,12 +103,13 @@ class VideoListViewModel(
             try {
                 val updatedVideo = repository.toggleLike(videoId)
                 if (updatedVideo != null) {
-                    // Update only likes and isLiked fields, preserve comments
+                    // Update only likes and isLiked fields, preserve comments from original video
                     _videos.value = _videos.value?.map { video ->
                         if (video.id == videoId) {
                             video.copy(
                                 likes = updatedVideo.likes,
-                                isLiked = updatedVideo.isLiked
+                                isLiked = updatedVideo.isLiked,
+                                comments = video.comments // Preserve original comments
                             )
                         } else {
                             video

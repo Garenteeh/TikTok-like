@@ -43,9 +43,19 @@ function randomInt(max) {
 
 function randomComments(depth = 0) {
   const list = ["Nice!", "🔥🔥🔥", "So cool", "Amazing video", "lol", "Wow", "Hahaha"];
+  const users = ["Alice", "Bob", "Charlie", "Diana", "Eve", "Frank", "Grace", "Henry"];
   const commentsCount = randomInt(5);
-  return Array.from({ length: commentsCount }, () => ({
-    text: list[randomInt(list.length)],
-    replies: depth < 2 ? randomComments(depth + 1) : []
-  }));
+
+  return Array.from({ length: commentsCount }, () => {
+    const now = Date.now();
+    const randomPastTime = now - randomInt(7 * 24 * 60 * 60 * 1000); // random time in last 7 days
+
+    return {
+      id: crypto.randomUUID(),
+      message: list[randomInt(list.length)],
+      user: users[randomInt(users.length)],
+      timestamp: randomPastTime,
+      replies: depth < 2 ? randomComments(depth + 1) : []
+    };
+  });
 }
