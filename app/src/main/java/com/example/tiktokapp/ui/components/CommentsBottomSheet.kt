@@ -22,6 +22,7 @@ import com.example.tiktokapp.domain.models.Comment
 fun CommentsBottomSheet(
     comments: List<Comment>,
     onDismiss: () -> Unit,
+    onLikeClick: (String) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     ModalBottomSheet(
@@ -104,7 +105,10 @@ fun CommentsBottomSheet(
                     contentPadding = PaddingValues(vertical = 8.dp)
                 ) {
                     items(comments) { comment ->
-                        CommentItem(comment = comment)
+                        CommentItem(
+                            comment = comment,
+                            onLikeClick = onLikeClick
+                        )
                     }
                 }
             }

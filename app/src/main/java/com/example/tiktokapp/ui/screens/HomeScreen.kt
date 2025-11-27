@@ -34,8 +34,8 @@ fun HomeScreen(
     val videos by viewModel.videos.observeAsState(emptyList())
     val isLoading by viewModel.isLoading.observeAsState(false)
 
-    // État pour gérer l'ouverture des commentaires
-    var selectedVideoForComments by remember { mutableStateOf<Video?>(null) }
+    // État pour gérer l'ouverture des commentaires - on stocke l'ID au lieu de la vidéo entière
+    var selectedVideoId by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(videos) {
         Log.d("HomeScreen", "Videos updated: ${videos.size} videos")
@@ -83,7 +83,7 @@ fun HomeScreen(
                 VideoActionButton(
                     icon = Icons.Default.Email,
                     text = video.formatCount(video.totalCommentsCount()),
-                    onClick = { selectedVideoForComments = video }
+                    onClick = { selectedVideoId = video.id }
                 )
                 VideoActionButton(
                     icon = Icons.Default.Share,
@@ -108,10 +108,17 @@ fun HomeScreen(
     }
 
     // BottomSheet pour afficher les commentaires
-    selectedVideoForComments?.let { video ->
-        CommentsBottomSheet(
-            comments = video.comments ?: emptyList(),
-            onDismiss = { selectedVideoForComments = null }
-        )
+    // On récupère la vidéo à jour depuis la liste videos pour que les commentaires soient réactifs
+    selectedVideoId?.let { videoId ->
+        val selectedVideo = videos.find { it.id == videoId }
+        selectedVideo?.let { video ->
+            CommentsBottomSheet(
+                comments = video.comments ?: emptyList(),
+                onDismiss = { selectedVideoId = null },
+                onLikeClick = { commentId ->
+                    viewModel.toggleCommentLike(video.id, commentId)
+                }
+            )
+        }
     }
 }

@@ -122,4 +122,42 @@ class VideoListViewModel(
             }
         }
     }
+
+    /**
+     * Toggle like status for a comment
+     */
+    fun toggleCommentLike(videoId: String, commentId: String) {
+        Log.d("VideoListViewModel", "toggleCommentLike called: videoId=$videoId, commentId=$commentId")
+        _videos.value = _videos.value?.map { video ->
+            if (video.id == videoId) {
+                Log.d("VideoListViewModel", "Found video, updating comments")
+                video.copy(comments = toggleCommentLikeRecursive(video.comments, commentId))
+            } else {
+                video
+            }
+        }
+        Log.d("VideoListViewModel", "Videos updated: ${_videos.value?.size} videos")
+    }
+
+    /**
+     * Recursive function to toggle like on a comment or its replies
+     */
+    private fun toggleCommentLikeRecursive(
+        comments: List<com.example.tiktokapp.domain.models.Comment>?,
+        commentId: String
+    ): List<com.example.tiktokapp.domain.models.Comment>? {
+        return comments?.map { comment ->
+            if (comment.id == commentId) {
+                // Toggle like on this comment
+                Log.d("VideoListViewModel", "Found comment $commentId, toggling like from ${comment.isLiked} to ${!comment.isLiked}")
+                comment.copy(
+                    isLiked = !comment.isLiked,
+                    likes = if (comment.isLiked) comment.likes - 1 else comment.likes + 1
+                )
+            } else {
+                // Check replies recursively
+                comment.copy(replies = toggleCommentLikeRecursive(comment.replies, commentId))
+            }
+        }
+    }
 }

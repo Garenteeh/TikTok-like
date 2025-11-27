@@ -1,10 +1,18 @@
 package com.example.tiktokapp.ui.components
 
+import android.util.Log
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -18,7 +26,8 @@ import java.util.*
 fun CommentItem(
     comment: Comment,
     modifier: Modifier = Modifier,
-    isReply: Boolean = false
+    isReply: Boolean = false,
+    onLikeClick: (String) -> Unit = {}
 ) {
     var showReplies by remember { mutableStateOf(false) }
     var visibleRepliesCount by remember { mutableStateOf(4) }
@@ -55,12 +64,49 @@ fun CommentItem(
 
         Spacer(modifier = Modifier.height(4.dp))
 
-        // Timestamp
-        Text(
-            text = formatTimestamp(comment.timestamp),
-            fontSize = 12.sp,
-            color = Color.White.copy(alpha = 0.6f)
-        )
+        // Timestamp et like
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = formatTimestamp(comment.timestamp),
+                fontSize = 12.sp,
+                color = Color.White.copy(alpha = 0.6f)
+            )
+
+            // Bouton de like
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        onClick = {
+                            Log.d("CommentItem", "Like clicked for comment ${comment.id}")
+                            onLikeClick(comment.id)
+                        }
+                    )
+                    .padding(4.dp)
+            ) {
+                Icon(
+                    imageVector = if (comment.isLiked) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                    contentDescription = if (comment.isLiked) "Unlike" else "Like",
+                    tint = if (comment.isLiked) Color(0xFFFF0050) else Color.White.copy(alpha = 0.7f),
+                    modifier = Modifier.size(18.dp)
+                )
+
+                if (comment.likes > 0) {
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = formatLikes(comment.likes),
+                        fontSize = 12.sp,
+                        color = Color.White.copy(alpha = 0.7f)
+                    )
+                }
+            }
+        }
 
         // Bouton pour afficher/masquer les réponses
         if (hasReplies && !isReply) {
@@ -93,7 +139,8 @@ fun CommentItem(
             repliesToShow.forEach { reply ->
                 CommentItem(
                     comment = reply,
-                    isReply = true
+                    isReply = true,
+                    onLikeClick = onLikeClick
                 )
             }
 
@@ -141,6 +188,18 @@ private fun formatTimestamp(timestamp: Long): String {
             val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.FRANCE)
             sdf.format(Date(timestamp))
         }
+    }
+}
+
+/**
+ * Formate le nombre de likes (ex: 1k, 10.1k, 1M)
+ */
+private fun formatLikes(count: Int): String {
+    return when {
+        count < 1000 -> count.toString()
+        count < 10000 -> String.format("%.1fk", count / 1000.0)
+        count < 1000000 -> "${count / 1000}k"
+        else -> String.format("%.1fM", count / 1000000.0)
     }
 }
 

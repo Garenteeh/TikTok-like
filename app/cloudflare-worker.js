@@ -55,6 +55,8 @@ function randomComments(depth = 0) {
       message: list[randomInt(list.length)],
       user: users[randomInt(users.length)],
       timestamp: randomPastTime,
+      likes: randomInt(100),
+      isLiked: false,
       replies: depth < 2 ? randomComments(depth + 1) : []
     };
   });
