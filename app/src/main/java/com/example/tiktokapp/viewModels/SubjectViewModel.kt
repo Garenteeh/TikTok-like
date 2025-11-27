@@ -25,8 +25,20 @@ class SubjectViewModel(
 
     private fun loadSubjects() {
         viewModelScope.launch {
-            repository.getSubjects(userId).collect { subjects ->
-                _uiState.value = _uiState.value.copy(subjects = subjects)
+            try {
+                _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+                repository.getSubjects(userId).collect { subjects ->
+                    _uiState.value = _uiState.value.copy(
+                        subjects = subjects,
+                        isLoading = false,
+                        error = null
+                    )
+                }
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    error = "Erreur de chargement: ${e.message}"
+                )
             }
         }
     }

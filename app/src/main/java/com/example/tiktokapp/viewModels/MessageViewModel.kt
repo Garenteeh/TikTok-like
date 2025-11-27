@@ -46,8 +46,19 @@ class MessageViewModel(
 
     private fun loadMessages() {
         viewModelScope.launch {
-            repository.getMessagesBySubject(subjectId).collect { messages ->
-                _uiState.value = _uiState.value.copy(messages = messages)
+            try {
+                repository.getMessagesBySubject(subjectId).collect { messages ->
+                    _uiState.value = _uiState.value.copy(
+                        messages = messages,
+                        isLoading = false,
+                        error = null
+                    )
+                }
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    error = "Erreur de chargement messages: ${e.message}"
+                )
             }
         }
     }
