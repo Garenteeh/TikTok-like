@@ -27,7 +27,8 @@ fun CommentItem(
     comment: Comment,
     modifier: Modifier = Modifier,
     isReply: Boolean = false,
-    onLikeClick: (String) -> Unit = {}
+    onLikeClick: (String) -> Unit = {},
+    onReplyClick: (String, String) -> Unit = { _, _ -> }
 ) {
     var showReplies by remember { mutableStateOf(false) }
     var visibleRepliesCount by remember { mutableStateOf(4) }
@@ -64,17 +65,37 @@ fun CommentItem(
 
         Spacer(modifier = Modifier.height(4.dp))
 
-        // Timestamp et like
+        // Timestamp, like et répondre
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = formatTimestamp(comment.timestamp),
-                fontSize = 12.sp,
-                color = Color.White.copy(alpha = 0.6f)
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = formatTimestamp(comment.timestamp),
+                    fontSize = 12.sp,
+                    color = Color.White.copy(alpha = 0.6f)
+                )
+
+                Spacer(modifier = Modifier.width(16.dp))
+
+                // Bouton Répondre
+                TextButton(
+                    onClick = { onReplyClick(comment.id, comment.user) },
+                    contentPadding = PaddingValues(0.dp),
+                    modifier = Modifier.height(24.dp)
+                ) {
+                    Text(
+                        text = "Répondre",
+                        fontSize = 12.sp,
+                        color = Color.White.copy(alpha = 0.7f),
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+            }
 
             // Bouton de like
             Row(
@@ -140,7 +161,8 @@ fun CommentItem(
                 CommentItem(
                     comment = reply,
                     isReply = true,
-                    onLikeClick = onLikeClick
+                    onLikeClick = onLikeClick,
+                    onReplyClick = onReplyClick
                 )
             }
 

@@ -6,20 +6,25 @@ import com.example.tiktokapp.data.mappers.toDomain
 import com.example.tiktokapp.data.mappers.toEntity
 import com.example.tiktokapp.data.remote.VideoRemoteDataSource
 import com.example.tiktokapp.domain.models.Video
+import com.example.tiktokapp.domain.repository.CommentRepository
 import com.example.tiktokapp.domain.repository.VideoRepository
 
 class VideoRepositoryImpl(
     private val videoDao: VideoDao,
+    private val commentRepository: CommentRepository,
     private val remoteDataSource: VideoRemoteDataSource = VideoRemoteDataSource()
 ) : VideoRepository {
 
     /**
-     * Get all videos from local database
+     * Get all videos from local database with their comments
      */
     override suspend fun getAllVideos(): List<Video> {
         return try {
             val entities = videoDao.getAllVideos()
-            entities.map { it.toDomain() }
+            entities.map { videoEntity ->
+                val comments = commentRepository.getCommentsForVideo(videoEntity.id)
+                videoEntity.toDomain().copy(comments = comments)
+            }
         } catch (e: Exception) {
             Log.e("VideoRepositoryImpl", "Error getting videos from DB", e)
             emptyList()
@@ -27,11 +32,13 @@ class VideoRepositoryImpl(
     }
 
     /**
-     * Get a specific video by ID from local database
+     * Get a specific video by ID from local database with comments
      */
     override suspend fun getVideoById(id: String): Video? {
         return try {
-            videoDao.getVideoById(id)?.toDomain()
+            val videoEntity = videoDao.getVideoById(id) ?: return null
+            val comments = commentRepository.getCommentsForVideo(id)
+            videoEntity.toDomain().copy(comments = comments)
         } catch (e: Exception) {
             Log.e("VideoRepositoryImpl", "Error getting video by id from DB", e)
             null
@@ -53,6 +60,14 @@ class VideoRepositoryImpl(
             videoDao.insertAll(entities)
             Log.d("VideoRepositoryImpl", "Saved ${entities.size} videos to DB")
 
+            // Save comments to DB via CommentRepository
+            remoteDtos.forEach { videoDto ->
+                val comments = videoDto.comments ?: emptyList()
+                if (comments.isNotEmpty()) {
+                    commentRepository.saveComments(videoDto.id, comments)
+                }
+            }
+
             // Return as domain models
             remoteDtos.map { it.toDomain() }
         } catch (e: Exception) {
@@ -68,6 +83,7 @@ class VideoRepositoryImpl(
     override suspend fun refreshVideos(count: Int): List<Video> {
         return try {
             videoDao.deleteAllVideos()
+            commentRepository.deleteAllComments()
             fetchRemoteVideos(count)
         } catch (e: Exception) {
             Log.e("VideoRepositoryImpl", "Error refreshing videos", e)

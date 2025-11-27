@@ -117,6 +117,12 @@ fun HomeScreen(
                 onDismiss = { selectedVideoId = null },
                 onLikeClick = { commentId ->
                     viewModel.toggleCommentLike(video.id, commentId)
+                },
+                onAddComment = { message ->
+                    viewModel.addComment(video.id, message)
+                },
+                onReplyToComment = { commentId, message ->
+                    viewModel.addReplyToComment(video.id, commentId, message)
                 }
             )
         }

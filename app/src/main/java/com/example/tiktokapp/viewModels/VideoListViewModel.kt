@@ -7,8 +7,10 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.tiktokapp.data.db.provider.DatabaseProvider
+import com.example.tiktokapp.data.repository.CommentRepositoryImpl
 import com.example.tiktokapp.data.repository.VideoRepositoryImpl
 import com.example.tiktokapp.domain.models.Video
+import com.example.tiktokapp.domain.repository.CommentRepository
 import com.example.tiktokapp.domain.repository.VideoRepository
 import kotlinx.coroutines.launch
 
@@ -17,8 +19,14 @@ class VideoListViewModel(
 ) : AndroidViewModel(application) {
 
     private val database = DatabaseProvider.provide(application)
-    private val repository: VideoRepository = VideoRepositoryImpl(
-        videoDao = database.videoDao()
+
+    private val videoRepository: VideoRepository = VideoRepositoryImpl(
+        videoDao = database.videoDao(),
+        commentRepository = CommentRepositoryImpl(database.commentDao())
+    )
+
+    private val commentRepository: CommentRepository = CommentRepositoryImpl(
+        commentDao = database.commentDao()
     )
 
     private val _videos = MutableLiveData<List<Video>>(emptyList())
@@ -39,7 +47,7 @@ class VideoListViewModel(
     private fun loadVideosFromDb() {
         viewModelScope.launch {
             try {
-                val localVideos = repository.getAllVideos()
+                val localVideos = videoRepository.getAllVideos()
                 if (localVideos.isNotEmpty()) {
                     _videos.value = localVideos
                     Log.d("VideoListViewModel", "Loaded ${localVideos.size} videos from DB")
@@ -63,7 +71,7 @@ class VideoListViewModel(
 
         viewModelScope.launch {
             try {
-                val newVideos = repository.fetchRemoteVideos(50)
+                val newVideos = videoRepository.fetchRemoteVideos(50)
                 _videos.value = newVideos
                 Log.d("VideoListViewModel", "Loaded ${newVideos.size} new videos")
             } catch (e: Exception) {
@@ -84,7 +92,7 @@ class VideoListViewModel(
 
         viewModelScope.launch {
             try {
-                val videos = repository.refreshVideos(50)
+                val videos = videoRepository.refreshVideos(50)
                 _videos.value = videos
                 Log.d("VideoListViewModel", "Refreshed with ${videos.size} videos")
             } catch (e: Exception) {
@@ -101,7 +109,7 @@ class VideoListViewModel(
     fun toggleLike(videoId: String) {
         viewModelScope.launch {
             try {
-                val updatedVideo = repository.toggleLike(videoId)
+                val updatedVideo = videoRepository.toggleLike(videoId)
                 if (updatedVideo != null) {
                     // Update only likes and isLiked fields, preserve comments from original video
                     _videos.value = _videos.value?.map { video ->
@@ -128,15 +136,29 @@ class VideoListViewModel(
      */
     fun toggleCommentLike(videoId: String, commentId: String) {
         Log.d("VideoListViewModel", "toggleCommentLike called: videoId=$videoId, commentId=$commentId")
-        _videos.value = _videos.value?.map { video ->
-            if (video.id == videoId) {
-                Log.d("VideoListViewModel", "Found video, updating comments")
-                video.copy(comments = toggleCommentLikeRecursive(video.comments, commentId))
-            } else {
-                video
+
+        viewModelScope.launch {
+            // Trouver le commentaire et mettre à jour ses likes
+            var updatedComment: com.example.tiktokapp.domain.models.Comment? = null
+
+            _videos.value = _videos.value?.map { video ->
+                if (video.id == videoId) {
+                    Log.d("VideoListViewModel", "Found video, updating comments")
+                    video.copy(comments = toggleCommentLikeRecursive(video.comments, commentId) { comment ->
+                        updatedComment = comment
+                    })
+                } else {
+                    video
+                }
             }
+
+            // Sauvegarder en DB via CommentRepository
+            updatedComment?.let { comment ->
+                commentRepository.updateCommentLike(comment.id, comment.likes, comment.isLiked)
+            }
+
+            Log.d("VideoListViewModel", "Videos updated: ${_videos.value?.size} videos")
         }
-        Log.d("VideoListViewModel", "Videos updated: ${_videos.value?.size} videos")
     }
 
     /**
@@ -144,19 +166,107 @@ class VideoListViewModel(
      */
     private fun toggleCommentLikeRecursive(
         comments: List<com.example.tiktokapp.domain.models.Comment>?,
-        commentId: String
+        commentId: String,
+        onFound: (com.example.tiktokapp.domain.models.Comment) -> Unit = {}
     ): List<com.example.tiktokapp.domain.models.Comment>? {
         return comments?.map { comment ->
             if (comment.id == commentId) {
                 // Toggle like on this comment
                 Log.d("VideoListViewModel", "Found comment $commentId, toggling like from ${comment.isLiked} to ${!comment.isLiked}")
-                comment.copy(
+                val updated = comment.copy(
                     isLiked = !comment.isLiked,
                     likes = if (comment.isLiked) comment.likes - 1 else comment.likes + 1
                 )
+                onFound(updated)
+                updated
             } else {
                 // Check replies recursively
-                comment.copy(replies = toggleCommentLikeRecursive(comment.replies, commentId))
+                comment.copy(replies = toggleCommentLikeRecursive(comment.replies, commentId, onFound))
+            }
+        }
+    }
+
+    /**
+     * Add a new comment to a video
+     */
+    fun addComment(videoId: String, message: String, username: String = "Moi") {
+        Log.d("VideoListViewModel", "addComment called: videoId=$videoId, message=$message")
+
+        viewModelScope.launch {
+            val newComment = com.example.tiktokapp.domain.models.Comment(
+                id = java.util.UUID.randomUUID().toString(),
+                message = message,
+                user = username,
+                timestamp = System.currentTimeMillis(),
+                likes = 0,
+                isLiked = false,
+                replies = emptyList()
+            )
+
+            // Mettre à jour l'UI
+            _videos.value = _videos.value?.map { video ->
+                if (video.id == videoId) {
+                    val updatedComments = (video.comments ?: emptyList()) + newComment
+                    Log.d("VideoListViewModel", "Comment added, total comments: ${updatedComments.size}")
+                    video.copy(comments = updatedComments)
+                } else {
+                    video
+                }
+            }
+
+            // Sauvegarder en DB via CommentRepository
+            commentRepository.saveComment(videoId, newComment)
+        }
+    }
+
+    /**
+     * Add a reply to a comment
+     */
+    fun addReplyToComment(videoId: String, commentId: String, message: String, username: String = "Moi") {
+        Log.d("VideoListViewModel", "addReplyToComment called: commentId=$commentId, message=$message")
+
+        viewModelScope.launch {
+            val newReply = com.example.tiktokapp.domain.models.Comment(
+                id = java.util.UUID.randomUUID().toString(),
+                message = message,
+                user = username,
+                timestamp = System.currentTimeMillis(),
+                likes = 0,
+                isLiked = false,
+                replies = emptyList()
+            )
+
+            // Mettre à jour l'UI
+            _videos.value = _videos.value?.map { video ->
+                if (video.id == videoId) {
+                    video.copy(comments = addReplyRecursive(video.comments, commentId, newReply))
+                } else {
+                    video
+                }
+            }
+
+            // Sauvegarder en DB via CommentRepository
+            commentRepository.saveComment(videoId, newReply, commentId)
+        }
+    }
+
+    /**
+     * Recursive function to add a reply to a comment
+     */
+    private fun addReplyRecursive(
+        comments: List<com.example.tiktokapp.domain.models.Comment>?,
+        commentId: String,
+        newReply: com.example.tiktokapp.domain.models.Comment
+    ): List<com.example.tiktokapp.domain.models.Comment>? {
+        return comments?.map { comment ->
+            if (comment.id == commentId) {
+                // Add reply to this comment
+                val updatedReplies = (comment.replies ?: emptyList()) + newReply
+                Log.d("VideoListViewModel", "Reply added to comment $commentId, total replies: ${updatedReplies.size}")
+                comment.copy(replies = updatedReplies)
+            } else {
+                // Check replies recursively
+                comment.copy(replies = addReplyRecursive(comment.replies, commentId, newReply))
             }
         }
     }
