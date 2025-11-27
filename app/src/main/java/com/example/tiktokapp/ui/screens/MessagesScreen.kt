@@ -30,6 +30,7 @@ fun MessagesScreen(
     val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
+
         topBar = {
             TopAppBar(
                 title = { Text(uiState.subject?.title ?: "Messages") },
