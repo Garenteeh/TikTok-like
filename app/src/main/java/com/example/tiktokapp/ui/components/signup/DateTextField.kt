@@ -1,4 +1,4 @@
- package com.example.tiktokapp.ui.components.signup
+package com.example.tiktokapp.ui.components.signup
 
  import androidx.compose.foundation.background
  import androidx.compose.foundation.layout.Arrangement
@@ -45,30 +45,28 @@
              verticalAlignment = Alignment.CenterVertically
          ) {
 
-//            leadingIcon()
-//
-//            Spacer(modifier = Modifier.width(10.dp))
-
              OutlinedTextField(
                  value = textFieldValue,
                  onValueChange = { incoming: TextFieldValue ->
                      val prevText = textFieldValue.text
                      val formatted = formatBirthDate(incoming.text, prevText)
 
-                     val prevDigits = prevText.filter { it.isDigit() }
-                     val newDigits = incoming.text.filter { it.isDigit() }
+                     // Compter le nombre de chiffres avant la position de sélection entrante
+                     val digitCursorPos = incoming.text
+                         .substring(0, incoming.selection.start.coerceAtLeast(0).coerceAtMost(incoming.text.length))
+                         .count { it.isDigit() }
 
-                     // Calculer position curseur souhaitée
-                     val desiredCursor = if (newDigits.length > prevDigits.length) {
-                         // insertion : placer après le caractère saisi et après les slashes automatiques
-                         var pos = newDigits.length
-                         if (newDigits.length > 2) pos += 1
-                         if (newDigits.length > 4) pos += 1
-                         pos.coerceAtMost(formatted.length)
-                     } else {
-                         // suppression ou édition : essayer de préserver la position relative
-                         incoming.selection.start.coerceAtMost(formatted.length)
+                     // Calculer la position du curseur dans le texte formaté
+                     fun digitIndexToFormattedPos(digitIndex: Int): Int {
+                         return when {
+                             digitIndex <= 0 -> 0
+                             digitIndex <= 1 -> digitIndex
+                             digitIndex <= 3 -> digitIndex + 1 // compte un slash après JJ
+                             else -> digitIndex + 2 // deux slashes après JJ/MM
+                         }
                      }
+
+                     val desiredCursor = digitIndexToFormattedPos(digitCursorPos).coerceAtMost(formatted.length)
 
                      val newTfv = TextFieldValue(formatted, TextRange(desiredCursor))
                      textFieldValue = newTfv
