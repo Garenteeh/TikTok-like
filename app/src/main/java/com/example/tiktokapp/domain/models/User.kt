@@ -1,6 +1,4 @@
-package com.example.tiktokapp.models
-
-import java.util.Date
+package com.example.tiktokapp.domain.models
 
 data class User(
     val firstName: String,
@@ -11,5 +9,6 @@ data class User(
     val phoneNumber: String,
     val country: String,
     val username: String,
+    val salt: String = ""
 
 )
