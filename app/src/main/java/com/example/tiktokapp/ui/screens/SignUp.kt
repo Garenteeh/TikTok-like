@@ -3,6 +3,7 @@ package com.example.tiktokapp.ui.screens
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,6 +19,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -25,6 +27,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -45,7 +48,8 @@ import com.example.tiktokapp.viewModels.UserViewModel
 @Composable
 fun SignupScreen(
     userViewModel: UserViewModel,
-    onSignupSuccess: () -> Unit,
+    onNavigateToLogin: () -> Unit,
+    onSignupSucess: () -> Unit
 ) {
     var firstName: String by remember { mutableStateOf("") }
     var lastName: String by remember { mutableStateOf("") }
@@ -57,8 +61,8 @@ fun SignupScreen(
     var birthDate: String by remember { mutableStateOf("") }
     var selectedCountry: Country? by remember { mutableStateOf<Country?>(null) }
 
-    // États pour erreurs
-    var errors by remember { mutableStateOf(mutableMapOf<String, String>()) }
+    // États pour erreurs — utiliser mutableStateMapOf pour être observable
+    val errors = remember { mutableStateMapOf<String, String>() }
 
     val scrollState = rememberScrollState()
 
@@ -70,11 +74,12 @@ fun SignupScreen(
         when (registrationState) {
             is RegistrationState.FieldErrors -> {
                 val fieldErrors = (registrationState as RegistrationState.FieldErrors).errors
-                errors = fieldErrors.toMutableMap()
+                errors.clear()
+                errors.putAll(fieldErrors)
             }
             is RegistrationState.Success -> {
                 Toast.makeText(context, "Inscription réussie", Toast.LENGTH_SHORT).show()
-                errors = mutableMapOf()
+                errors.clear()
                 userViewModel.resetState()
             }
             is RegistrationState.Error -> {
@@ -251,7 +256,7 @@ fun SignupScreen(
 
                 if (validationErrors.isEmpty()) {
                     // Aucun problème : procéder à l'inscription
-                    errors = mutableMapOf()
+                    errors.clear()
                     val newUser = User(
                         firstName = firstName,
                         lastName = lastName,
@@ -263,17 +268,22 @@ fun SignupScreen(
                         birthDate = birthDate
                     )
                     userViewModel.registerUser(newUser)
-                    Toast.makeText(context, "Inscription réussie", Toast.LENGTH_SHORT).show()
-                    onSignupSuccess()
+                    onSignupSucess()
 
                 } else {
                     // Il y a des erreurs : les afficher
-                    errors = validationErrors
+                    errors.putAll(validationErrors)
                 }
             },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("S'inscrire")
+        }
+
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+            TextButton(onClick = onNavigateToLogin) {
+                Text("Déjà un compte ? Se connecter")
+            }
         }
     }
 }

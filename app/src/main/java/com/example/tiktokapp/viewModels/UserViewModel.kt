@@ -24,7 +24,7 @@ class UserViewModel(
         userDao = database.userDao()
     )
 
-    // État pour suivre le résultat de l'inscription
+    // État pour suivre le résultat de l'inscription et du login
     private val _registrationState = MutableStateFlow<RegistrationState>(RegistrationState.Idle)
     val registrationState: StateFlow<RegistrationState> = _registrationState
 
@@ -50,13 +50,48 @@ class UserViewModel(
         }
     }
 
-    // Pour réinitialiser l'état après avoir affiché un Toast ou navigué
+    fun loginUser(identifier: String, password: String) {
+        if (_registrationState.value is RegistrationState.Loading) return
+
+        viewModelScope.launch {
+            _registrationState.value = RegistrationState.Loading
+            try {
+                // validations simples côté serveur côté client
+                if (identifier.isBlank()) {
+                    _registrationState.value = RegistrationState.FieldErrors(mapOf("identifier" to "Email ou pseudo requis"))
+                    return@launch
+                }
+                if (password.isBlank()) {
+                    _registrationState.value = RegistrationState.FieldErrors(mapOf("password" to "Mot de passe requis"))
+                    return@launch
+                }
+
+                val user = if (identifier.contains("@")) {
+                    userRepository.getUserByEmail(identifier)
+                } else {
+                    userRepository.login(identifier, password)
+                }
+
+                if (user != null) {
+                    _registrationState.value = RegistrationState.Success
+                } else {
+                    // retourner une erreur ciblée sur le champ identifier (ou password)
+                    _registrationState.value = RegistrationState.FieldErrors(mapOf("identifier" to "Identifiant ou mot de passe incorrect"))
+                }
+            } catch (e: Exception) {
+                Log.e("UserViewModel", "Login error", e)
+                _registrationState.value = RegistrationState.Error("Erreur lors de la connexion : ${e.message}")
+            }
+        }
+    }
+
+    // Pour réinitialiser l'état après avoir affiché un Toast
     fun resetState() {
         _registrationState.value = RegistrationState.Idle
     }
 }
 
-// Classe scellée pour définir les différents états de l'inscription
+// Classe scellée pour définir les différents états de l'inscription / login
 sealed class RegistrationState {
     object Idle : RegistrationState()
     object Loading : RegistrationState()
