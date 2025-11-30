@@ -1,5 +1,6 @@
 package com.example.tiktokapp.ui.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -18,25 +19,34 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.tiktokapp.R
+import com.example.tiktokapp.data.utils.UserUtils.validateAll
+import com.example.tiktokapp.domain.models.User
 import com.example.tiktokapp.models.Country
-import com.example.tiktokapp.models.UserValidation.validateAll
 import com.example.tiktokapp.repositories.CountryRepository
 import com.example.tiktokapp.ui.components.signup.BaseTextField
 import com.example.tiktokapp.ui.components.signup.BirthDateTextField
 import com.example.tiktokapp.ui.components.signup.CountryPicker
 import com.example.tiktokapp.ui.components.signup.PasswordTextField
 import com.example.tiktokapp.ui.components.signup.PhoneTextField
+import com.example.tiktokapp.viewModels.RegistrationState
+import com.example.tiktokapp.viewModels.UserViewModel
 
 @Composable
-fun SignupScreen() {
+fun SignupScreen(
+    userViewModel: UserViewModel,
+    onSignupSuccess: () -> Unit,
+) {
     var firstName: String by remember { mutableStateOf("") }
     var lastName: String by remember { mutableStateOf("") }
     var username: String by remember { mutableStateOf("") }
@@ -52,6 +62,31 @@ fun SignupScreen() {
 
     val scrollState = rememberScrollState()
 
+    val context = LocalContext.current
+
+    val registrationState by userViewModel.registrationState.collectAsState()
+
+    LaunchedEffect(registrationState) {
+        when (registrationState) {
+            is RegistrationState.FieldErrors -> {
+                val fieldErrors = (registrationState as RegistrationState.FieldErrors).errors
+                errors = fieldErrors.toMutableMap()
+            }
+            is RegistrationState.Success -> {
+                Toast.makeText(context, "Inscription réussie", Toast.LENGTH_SHORT).show()
+                errors = mutableMapOf()
+                userViewModel.resetState()
+            }
+            is RegistrationState.Error -> {
+                val message = (registrationState as RegistrationState.Error).message
+                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                userViewModel.resetState()
+            }
+            else -> {}
+        }
+    }
+
+
     Column (
         modifier = Modifier
             .fillMaxSize()
@@ -66,7 +101,7 @@ fun SignupScreen() {
             value = firstName,
             onValueChange = {
                 firstName = it
-                errors["firstName"] = ""
+                errors.remove("firstName")
             },
             label = "Prénom",
             errorMessage = errors["firstName"] ?: "",
@@ -84,7 +119,7 @@ fun SignupScreen() {
             value = lastName,
             onValueChange = {
                 lastName = it
-                errors["lastName"] = ""
+                errors.remove("lastName")
             },
             label = "Nom",
             errorMessage = errors["lastName"] ?: "",
@@ -102,7 +137,7 @@ fun SignupScreen() {
             value = username,
             onValueChange = {
                 username = it
-                errors["username"] = ""
+                errors.remove("username")
             },
             label = "Nom d'utilisateur",
             errorMessage = errors["username"] ?: "",
@@ -120,7 +155,7 @@ fun SignupScreen() {
             value = email,
             onValueChange = {
                 email = it
-                errors["email"] = ""
+                errors.remove("email")
             },
             label = "Email",
             errorMessage = errors["email"] ?: "",
@@ -139,7 +174,7 @@ fun SignupScreen() {
             value = phoneNumber,
             onValueChange = {
                 phoneNumber = it
-                errors["phone"] = ""
+                errors.remove("phone")
            },
             label = "Numéro de téléphone",
             errorMessage = errors["phone"] ?: "",
@@ -151,7 +186,7 @@ fun SignupScreen() {
             value = password,
             onValueChange = {
                 password = it
-                errors["password"] = ""
+                errors.remove("password")
             },
             label = "Mot de passe",
             errorMessage = errors["password"] ?: "",
@@ -163,7 +198,7 @@ fun SignupScreen() {
             value = confirmPassword,
             onValueChange = {
                 confirmPassword = it
-                errors["confirmPassword"] = ""
+                errors.remove("confirmPassword")
             },
             label = "Confirmation du Mot de passe",
             errorMessage = errors["confirmPassword"] ?: "",
@@ -176,7 +211,7 @@ fun SignupScreen() {
             value = birthDate,
             onValueChange = {
                 birthDate = it
-                errors["birthDate"] = ""
+                errors.remove("birthDate")
             },
             error = errors["birthDate"] ?: "",
             isError =  errors.containsKey("birthDate")
@@ -188,7 +223,7 @@ fun SignupScreen() {
             selectedCountry = selectedCountry,
             onCountrySelected = {
                 selectedCountry = it
-                errors["country"] = ""
+                errors.remove("country")
             },
             countries = CountryRepository.countries,
             label = "Pays",
@@ -217,7 +252,20 @@ fun SignupScreen() {
                 if (validationErrors.isEmpty()) {
                     // Aucun problème : procéder à l'inscription
                     errors = mutableMapOf()
-                    // TODO: envoyer les données au backend ou stocker localement
+                    val newUser = User(
+                        firstName = firstName,
+                        lastName = lastName,
+                        username = username,
+                        email = email,
+                        password = password,
+                        phoneNumber = phoneNumber,
+                        country = countryName,
+                        birthDate = birthDate
+                    )
+                    userViewModel.registerUser(newUser)
+                    Toast.makeText(context, "Inscription réussie", Toast.LENGTH_SHORT).show()
+                    onSignupSuccess()
+
                 } else {
                     // Il y a des erreurs : les afficher
                     errors = validationErrors
