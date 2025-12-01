@@ -37,6 +37,11 @@ class UserRepositoryImpl(
         return entity?.toDomain()
     }
 
+    override suspend fun getUserByUsername(username: String): User? {
+        val entity = userDao.getUserByUsername(username)
+        return entity?.toDomain()
+    }
+
     override suspend fun login(
         identifier: String,
         password: String
