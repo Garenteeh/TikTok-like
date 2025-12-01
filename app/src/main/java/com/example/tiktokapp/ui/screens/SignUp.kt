@@ -43,11 +43,11 @@ import com.example.tiktokapp.ui.components.signup.CountryPicker
 import com.example.tiktokapp.ui.components.signup.PasswordTextField
 import com.example.tiktokapp.ui.components.signup.PhoneTextField
 import com.example.tiktokapp.viewModels.RegistrationState
-import com.example.tiktokapp.viewModels.UserViewModel
+import com.example.tiktokapp.viewModels.RegisterViewModel
 
 @Composable
 fun SignupScreen(
-    userViewModel: UserViewModel,
+    registerViewModel: RegisterViewModel,
     onNavigateToLogin: () -> Unit,
     onSignupSucess: () -> Unit
 ) {
@@ -68,7 +68,7 @@ fun SignupScreen(
 
     val context = LocalContext.current
 
-    val registrationState by userViewModel.registrationState.collectAsState()
+    val registrationState by registerViewModel.registrationState.collectAsState()
 
     LaunchedEffect(registrationState) {
         when (registrationState) {
@@ -80,12 +80,12 @@ fun SignupScreen(
             is RegistrationState.Success -> {
                 Toast.makeText(context, "Inscription réussie", Toast.LENGTH_SHORT).show()
                 errors.clear()
-                userViewModel.resetState()
+                registerViewModel.resetState()
             }
             is RegistrationState.Error -> {
                 val message = (registrationState as RegistrationState.Error).message
                 Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-                userViewModel.resetState()
+                registerViewModel.resetState()
             }
             else -> {}
         }
@@ -267,7 +267,7 @@ fun SignupScreen(
                         country = countryName,
                         birthDate = birthDate
                     )
-                    userViewModel.registerUser(newUser)
+                    registerViewModel.registerUser(newUser)
                     onSignupSucess()
 
                 } else {

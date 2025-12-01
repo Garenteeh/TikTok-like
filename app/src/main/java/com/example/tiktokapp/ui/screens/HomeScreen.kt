@@ -20,14 +20,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.tiktokapp.ui.components.BottomBar
 import com.example.tiktokapp.ui.components.VideoActionButton
 import com.example.tiktokapp.ui.components.VideoCard
+import com.example.tiktokapp.viewModels.LoginViewModel
 import com.example.tiktokapp.viewModels.VideoListViewModel
 
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
-    viewModel: VideoListViewModel = viewModel()
+    viewModel: VideoListViewModel = viewModel(),
+    onNavigateToAddVideo: () -> Unit = {},
+    onNavigateToProfile: () -> Unit = {},
 ) {
     val videos by viewModel.videos.observeAsState(emptyList())
     val isLoading by viewModel.isLoading.observeAsState(false)
@@ -85,4 +89,10 @@ fun HomeScreen(
             }
         }
     }
+    BottomBar({}, onNavigateToAddVideo, onNavigateToProfile)
+}
+
+@Composable
+fun HomeScreenPreview() {
+    HomeScreen()
 }
