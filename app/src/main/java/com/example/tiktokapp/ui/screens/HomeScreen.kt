@@ -3,6 +3,7 @@ package com.example.tiktokapp.ui.screens
 import android.util.Log
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -14,6 +15,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
@@ -23,15 +25,14 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.tiktokapp.ui.components.BottomBar
 import com.example.tiktokapp.ui.components.VideoActionButton
 import com.example.tiktokapp.ui.components.VideoCard
-import com.example.tiktokapp.viewModels.LoginViewModel
 import com.example.tiktokapp.viewModels.VideoListViewModel
 
 @Composable
 fun HomeScreen(
-    modifier: Modifier = Modifier,
-    viewModel: VideoListViewModel = viewModel(),
     onNavigateToAddVideo: () -> Unit = {},
     onNavigateToProfile: () -> Unit = {},
+    modifier: Modifier = Modifier,
+    viewModel: VideoListViewModel = viewModel(),
 ) {
     val videos by viewModel.videos.observeAsState(emptyList())
     val isLoading by viewModel.isLoading.observeAsState(false)
@@ -59,37 +60,44 @@ fun HomeScreen(
 
     val scrolling by remember { derivedStateOf { state.isScrollInProgress } }
 
-    LazyColumn(
-        state = state,
-        flingBehavior = fling,
-        verticalArrangement = Arrangement.spacedBy(0.dp),
-        modifier = modifier
-    ) {
-        itemsIndexed(videos) { index, video ->
-
-            VideoCard(
-                video = video,
-                isPlaying = index == centered && !scrolling,
-                modifier = Modifier.height(screenHeight)
-            ) {
-                VideoActionButton(Icons.Default.Favorite, "${video.likes}") {}
-                VideoActionButton(Icons.Default.Email, "${video.totalCommentsCount()}") {}
-                VideoActionButton(Icons.Default.Share) {}
-                VideoActionButton(Icons.Default.Refresh) {}
-            }
-
-            if (index >= videos.lastIndex - 2 && !isLoading) {
-                viewModel.loadMoreVideos()
-            }
+    Scaffold(
+        modifier = modifier.fillMaxSize(),
+        bottomBar = {
+            BottomBar(onHome = {}, onAdd = onNavigateToAddVideo, onProfile = onNavigateToProfile)
         }
+    ) { paddingValues ->
+        LazyColumn(
+            state = state,
+            flingBehavior = fling,
+            verticalArrangement = Arrangement.spacedBy(0.dp),
+            contentPadding = paddingValues,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            itemsIndexed(videos) { index, video ->
 
-        if (isLoading) {
-            item {
-                CircularProgressIndicator(Modifier.padding(16.dp))
+                VideoCard(
+                    video = video,
+                    isPlaying = index == centered && !scrolling,
+                    modifier = Modifier.height(screenHeight)
+                ) {
+                    VideoActionButton(Icons.Default.Favorite, "${video.likes}") {}
+                    VideoActionButton(Icons.Default.Email, "${video.totalCommentsCount()}") {}
+                    VideoActionButton(Icons.Default.Share) {}
+                    VideoActionButton(Icons.Default.Refresh) {}
+                }
+
+                if (index >= videos.lastIndex - 2 && !isLoading) {
+                    viewModel.loadMoreVideos()
+                }
+            }
+
+            if (isLoading) {
+                item {
+                    CircularProgressIndicator(Modifier.padding(16.dp))
+                }
             }
         }
     }
-    BottomBar({}, onNavigateToAddVideo, onNavigateToProfile)
 }
 
 @Composable
