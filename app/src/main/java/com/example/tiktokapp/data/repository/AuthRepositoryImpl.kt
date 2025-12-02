@@ -2,6 +2,8 @@ package com.example.tiktokapp.data.repository
 
 import com.example.tiktokapp.data.datasource.TokenLocalDataSource
 import com.example.tiktokapp.data.db.dao.UserDao
+import com.example.tiktokapp.data.exceptions.EmailAlreadyTakenException
+import com.example.tiktokapp.data.exceptions.UsernameAlreadyTakenException
 import com.example.tiktokapp.data.mappers.toDomain
 import com.example.tiktokapp.data.mappers.toEntity
 import com.example.tiktokapp.data.utils.UserUtils
@@ -42,11 +44,11 @@ class AuthRepositoryImpl(
         }
     }
 
-    override suspend fun register(name: String, email: String, password: String): Result<User> {
+    override suspend fun register(name: String, username: String, email: String, password: String): Result<User> {
         return try {
             // Vérifier si l'email est déjà pris
             if (userDao.isEmailTaken(email)) {
-                return Result.failure(Exception("Email déjà utilisé"))
+                return Result.failure(EmailAlreadyTakenException())
             }
 
             // Déterminer prénom / nom à partir du champ name
@@ -54,22 +56,28 @@ class AuthRepositoryImpl(
             val firstName = parts.getOrNull(0) ?: ""
             val lastName = parts.getOrNull(1) ?: ""
 
-            // Générer un username à partir du nom ou de l'email, et s'assurer qu'il est unique
-            var baseUsername = if (firstName.isNotBlank()) {
-                (firstName + lastName).lowercase(Locale.getDefault()).replace("\\s+".toRegex(), "")
-            } else {
-                email.substringBefore("@").lowercase(Locale.getDefault())
+            // Use provided username if present, otherwise generate one
+            var finalUsername = username.trim()
+            if (finalUsername.isBlank()) {
+                var baseUsername = if (firstName.isNotBlank()) {
+                    (firstName + lastName).lowercase(Locale.getDefault()).replace("\\s+".toRegex(), "")
+                } else {
+                    email.substringBefore("@").lowercase(Locale.getDefault())
+                }
+                if (baseUsername.isBlank()) baseUsername = "user"
+                finalUsername = baseUsername
+                var attempt = 0
+                while (userDao.isUsernameTaken(finalUsername)) {
+                    attempt++
+                    finalUsername = "$baseUsername${Random.nextInt(100, 999)}"
+                    if (attempt > 10) break
+                }
             }
-            if (baseUsername.isBlank()) baseUsername = "user"
 
-            var username = baseUsername
-            var attempt = 0
-            while (userDao.isUsernameTaken(username)) {
-                attempt++
-                username = "$baseUsername${Random.nextInt(100, 999)}"
-                if (attempt > 10) break
+            // If finalUsername already exists, return an error
+            if (userDao.isUsernameTaken(finalUsername)) {
+                return Result.failure(UsernameAlreadyTakenException())
             }
-
             // Générer sel et hasher le mot de passe
             val salt = UserUtils.generateSalt()
             val hashedPassword = UserUtils.hashPasswordWithSalt(password, salt)
@@ -83,7 +91,7 @@ class AuthRepositoryImpl(
                 password = hashedPassword,
                 phoneNumber = "",
                 country = "",
-                username = username,
+                username = finalUsername,
                 salt = salt
             )
 
