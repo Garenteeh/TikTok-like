@@ -29,7 +29,7 @@ class RegisterViewModel(
         viewModelScope.launch {
             _registrationState.value = RegistrationState.Loading
             try {
-                val result = registerUseCase("${user.firstName} ${user.lastName}", user.email, user.password)
+                val result = registerUseCase("${user.firstName} ${user.lastName}", user.username, user.email, user.password)
                 if (result.isSuccess) {
                     val savedUser = result.getOrNull()!!
                     // On sauvegarde le pseudo dans les prefs pour session persistante
@@ -37,11 +37,18 @@ class RegisterViewModel(
                     _registrationState.value = RegistrationState.Success
                 } else {
                     val ex = result.exceptionOrNull()
-                    val message = ex?.message ?: "Erreur lors de l'inscription"
-                    if (message.contains("Email déjà utilisé", ignoreCase = true)) {
-                        _registrationState.value = RegistrationState.FieldErrors(mapOf("email" to "Email déjà utilisé"))
-                    } else {
-                        _registrationState.value = RegistrationState.Error(message)
+                    // Map specific exceptions to field errors
+                    when (ex) {
+                        is com.example.tiktokapp.data.exceptions.EmailAlreadyTakenException -> {
+                            _registrationState.value = RegistrationState.FieldErrors(mapOf("email" to "Email déjà utilisé"))
+                        }
+                        is com.example.tiktokapp.data.exceptions.UsernameAlreadyTakenException -> {
+                            _registrationState.value = RegistrationState.FieldErrors(mapOf("username" to "Pseudo déjà utilisé"))
+                        }
+                        else -> {
+                            val message = ex?.message ?: "Erreur lors de l'inscription"
+                            _registrationState.value = RegistrationState.Error(message)
+                        }
                     }
                 }
             } catch (e: Exception) {

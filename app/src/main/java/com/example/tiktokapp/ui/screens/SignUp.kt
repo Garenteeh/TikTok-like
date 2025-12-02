@@ -81,6 +81,8 @@ fun SignupScreen(
                 Toast.makeText(context, "Inscription réussie", Toast.LENGTH_SHORT).show()
                 errors.clear()
                 registerViewModel.resetState()
+                // navigation to home (or next) only after successful registration
+                onSignupSucess()
             }
             is RegistrationState.Error -> {
                 val message = (registrationState as RegistrationState.Error).message
@@ -268,7 +270,6 @@ fun SignupScreen(
                         birthDate = birthDate
                     )
                     registerViewModel.registerUser(newUser)
-                    onSignupSucess()
 
                 } else {
                     // Il y a des erreurs : les afficher
