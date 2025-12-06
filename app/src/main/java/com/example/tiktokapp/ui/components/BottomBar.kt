@@ -16,6 +16,7 @@ import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,14 +45,14 @@ fun BottomBar(
                 .height(64.dp)
                 .padding(horizontal = 30.dp)
                 .clip(RoundedCornerShape(32.dp))
-                .background(Color(0xFFE6D3F8)),
+                .background(MaterialTheme.colorScheme.primaryContainer),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceAround
         ) {
             IconButton(onClick = { onHome() }) {
                 Icon(
                     Icons.Outlined.Home,
-                    tint = Color(0xFFAF97FF),
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(35.dp),
                     contentDescription = "Home Button"
                 )
@@ -61,13 +62,13 @@ fun BottomBar(
                 modifier = Modifier
                     .size(56.dp)
                     .clip(CircleShape)
-                    .background(Color(0xFF4A0CF8)),
+                    .background(MaterialTheme.colorScheme.primary),
                 contentAlignment = Alignment.Center
             ) {
                 IconButton(onClick = { onAdd() }) {
                     Icon(
                         Icons.Outlined.Add,
-                        tint = Color.White,
+                        tint = MaterialTheme.colorScheme.onPrimary,
                         modifier = Modifier.size(30.dp),
                         contentDescription = "Add Button"
                     )
@@ -77,7 +78,7 @@ fun BottomBar(
             IconButton(onClick = onProfile) {
                 Icon(
                     Icons.Outlined.Person,
-                    tint = Color(0xFFAF97FF),
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(35.dp),
                     contentDescription = "Profile Button"
                 )

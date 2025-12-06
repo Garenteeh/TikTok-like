@@ -12,10 +12,10 @@ import com.example.tiktokapp.data.db.entities.VideoEntity
 @Database(
     entities = [
         VideoEntity::class,
-        UserEntity::class
+        UserEntity::class,
+        CommentEntity::class
     ],
-    entities = [VideoEntity::class, CommentEntity::class],
-    version = 3,
+    version = 4,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {

@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
@@ -39,6 +40,10 @@ fun CommentItem(
     val repliesList = comment.replies ?: emptyList()
     val hasReplies = repliesList.isNotEmpty()
 
+    val onSurfaceColor = MaterialTheme.colorScheme.onSurface
+    val secondaryColor = MaterialTheme.colorScheme.secondary
+    val errorColor = MaterialTheme.colorScheme.error
+
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -54,7 +59,7 @@ fun CommentItem(
             text = comment.user,
             fontWeight = FontWeight.Bold,
             fontSize = 14.sp,
-            color = Color.White
+            color = onSurfaceColor
         )
 
         Spacer(modifier = Modifier.height(4.dp))
@@ -63,7 +68,7 @@ fun CommentItem(
         Text(
             text = comment.message,
             fontSize = 14.sp,
-            color = Color.White.copy(alpha = 0.9f)
+            color = onSurfaceColor.copy(alpha = 0.9f)
         )
 
         Spacer(modifier = Modifier.height(4.dp))
@@ -80,7 +85,7 @@ fun CommentItem(
                 Text(
                     text = formatTimestamp(comment.timestamp),
                     fontSize = 12.sp,
-                    color = Color.White.copy(alpha = 0.6f)
+                    color = onSurfaceColor.copy(alpha = 0.6f)
                 )
 
                 Spacer(modifier = Modifier.width(16.dp))
@@ -94,7 +99,7 @@ fun CommentItem(
                     Text(
                         text = "Répondre",
                         fontSize = 12.sp,
-                        color = Color.White.copy(alpha = 0.7f),
+                        color = onSurfaceColor.copy(alpha = 0.7f),
                         fontWeight = FontWeight.Medium
                     )
                 }
@@ -112,7 +117,7 @@ fun CommentItem(
                         Text(
                             text = "Supprimer",
                             fontSize = 12.sp,
-                            color = Color(0xFFFF0050).copy(alpha = 0.8f),
+                            color = errorColor.copy(alpha = 0.8f),
                             fontWeight = FontWeight.Medium
                         )
                     }
@@ -136,7 +141,7 @@ fun CommentItem(
                 Icon(
                     imageVector = if (comment.isLiked) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
                     contentDescription = if (comment.isLiked) "Unlike" else "Like",
-                    tint = if (comment.isLiked) Color(0xFFFF0050) else Color.White.copy(alpha = 0.7f),
+                    tint = if (comment.isLiked) errorColor else onSurfaceColor.copy(alpha = 0.7f),
                     modifier = Modifier.size(18.dp)
                 )
 
@@ -145,7 +150,7 @@ fun CommentItem(
                     Text(
                         text = formatLikes(comment.likes),
                         fontSize = 12.sp,
-                        color = Color.White.copy(alpha = 0.7f)
+                        color = onSurfaceColor.copy(alpha = 0.7f)
                     )
                 }
             }
@@ -167,7 +172,7 @@ fun CommentItem(
                         "--- afficher les réponses ---"
                     },
                     fontSize = 13.sp,
-                    color = Color(0xFF00D4FF),
+                    color = secondaryColor,
                     fontWeight = FontWeight.Medium
                 )
             }
@@ -201,7 +206,7 @@ fun CommentItem(
                     Text(
                         text = "Afficher ${minOf(4, repliesList.size - visibleRepliesCount)} de plus",
                         fontSize = 13.sp,
-                        color = Color(0xFF00D4FF),
+                        color = secondaryColor,
                         fontWeight = FontWeight.Medium
                     )
                 }
@@ -212,7 +217,7 @@ fun CommentItem(
         if (!isReply) {
             Spacer(modifier = Modifier.height(8.dp))
             HorizontalDivider(
-                color = Color.White.copy(alpha = 0.2f),
+                color = onSurfaceColor.copy(alpha = 0.2f),
                 thickness = 0.5.dp
             )
         }

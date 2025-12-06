@@ -1,6 +1,7 @@
 package com.example.tiktokapp.ui.screens
 
 import android.util.Log
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,6 +16,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
@@ -22,7 +24,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.tiktokapp.domain.models.Video
 import com.example.tiktokapp.ui.components.CommentsBottomSheet
 import com.example.tiktokapp.ui.components.BottomBar
 import com.example.tiktokapp.ui.components.VideoActionButton
@@ -35,6 +36,7 @@ fun HomeScreen(
     onNavigateToProfile: () -> Unit = {},
     modifier: Modifier = Modifier,
     viewModel: VideoListViewModel = viewModel(),
+    currentUsername: String = "Moi"
 ) {
     val videos by viewModel.videos.observeAsState(emptyList())
     val isLoading by viewModel.isLoading.observeAsState(false)
@@ -65,55 +67,51 @@ fun HomeScreen(
     val scrolling by remember { derivedStateOf { state.isScrollInProgress } }
 
     Scaffold(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background),
+        containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
             BottomBar(onHome = {}, onAdd = onNavigateToAddVideo, onProfile = onNavigateToProfile)
         }
     ) { paddingValues ->
+        // Calculer la hauteur disponible pour les vidéos (hauteur écran - bottom bar)
+        val videoHeight = screenHeight - paddingValues.calculateBottomPadding()
+
         LazyColumn(
             state = state,
             flingBehavior = fling,
             verticalArrangement = Arrangement.spacedBy(0.dp),
-            contentPadding = paddingValues,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
         ) {
             itemsIndexed(videos) { index, video ->
-
-            VideoCard(
-                video = video,
-                isPlaying = index == centered && !scrolling,
-                modifier = Modifier.height(screenHeight)
-            ) {
-                VideoActionButton(
-                    icon = Icons.Default.Favorite,
-                    text = video.formatCount(video.likes),
-                    isActive = video.isLiked,
-                    activeColor = androidx.compose.ui.graphics.Color.Red,
-                    onClick = { viewModel.toggleLike(video.id) }
-                )
-                VideoActionButton(
-                    icon = Icons.Default.Email,
-                    text = video.formatCount(video.totalCommentsCount()),
-                    onClick = { selectedVideoId = video.id }
-                )
-                VideoActionButton(
-                    icon = Icons.Default.Share,
-                    onClick = {}
-                )
-                VideoActionButton(
-                    icon = Icons.Default.Refresh,
-                    onClick = {}
-                )
-            }
                 VideoCard(
                     video = video,
                     isPlaying = index == centered && !scrolling,
-                    modifier = Modifier.height(screenHeight)
+                    modifier = Modifier.height(videoHeight)
                 ) {
-                    VideoActionButton(Icons.Default.Favorite, "${video.likes}") {}
-                    VideoActionButton(Icons.Default.Email, "${video.totalCommentsCount()}") {}
-                    VideoActionButton(Icons.Default.Share) {}
-                    VideoActionButton(Icons.Default.Refresh) {}
+                    VideoActionButton(
+                        icon = Icons.Default.Favorite,
+                        text = video.formatCount(video.likes),
+                        isActive = video.isLiked,
+                        activeColor = androidx.compose.ui.graphics.Color.Red,
+                        onClick = { viewModel.toggleLike(video.id) }
+                    )
+                    VideoActionButton(
+                        icon = Icons.Default.Email,
+                        text = video.formatCount(video.totalCommentsCount()),
+                        onClick = { selectedVideoId = video.id }
+                    )
+                    VideoActionButton(
+                        icon = Icons.Default.Share,
+                        onClick = {}
+                    )
+                    VideoActionButton(
+                        icon = Icons.Default.Refresh,
+                        onClick = {}
+                    )
                 }
 
                 if (index >= videos.lastIndex - 2 && !isLoading) {
@@ -139,15 +137,15 @@ fun HomeScreen(
                     viewModel.toggleCommentLike(video.id, commentId)
                 },
                 onAddComment = { message ->
-                    viewModel.addComment(video.id, message)
+                    viewModel.addComment(video.id, message, currentUsername)
                 },
                 onReplyToComment = { commentId, message ->
-                    viewModel.addReplyToComment(video.id, commentId, message)
+                    viewModel.addReplyToComment(video.id, commentId, message, currentUsername)
                 },
                 onDeleteComment = { commentId ->
                     viewModel.deleteComment(video.id, commentId)
                 },
-                currentUsername = "Moi",
+                currentUsername = currentUsername,
                 videoOwner = video.user
             )
         }

@@ -34,16 +34,21 @@ fun CommentsBottomSheet(
     var commentText by remember { mutableStateOf("") }
     var replyToCommentId by remember { mutableStateOf<String?>(null) }
     var replyToUsername by remember { mutableStateOf<String?>(null) }
+
+    val surfaceColor = MaterialTheme.colorScheme.surface
+    val onSurfaceColor = MaterialTheme.colorScheme.onSurface
+    val secondaryColor = MaterialTheme.colorScheme.secondary
+
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        containerColor = Color(0xFF1A1A1A),
+        containerColor = surfaceColor,
         modifier = modifier,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         dragHandle = {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color(0xFF1A1A1A))
+                    .background(surfaceColor)
                     .padding(vertical = 8.dp),
                 contentAlignment = Alignment.Center
             ) {
@@ -52,7 +57,7 @@ fun CommentsBottomSheet(
                         .width(40.dp)
                         .height(4.dp)
                         .background(
-                            Color.White.copy(alpha = 0.3f),
+                            onSurfaceColor.copy(alpha = 0.3f),
                             RoundedCornerShape(2.dp)
                         )
                 )
@@ -63,7 +68,7 @@ fun CommentsBottomSheet(
             modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxHeight(0.85f)
-                .background(Color(0xFF1A1A1A))
+                .background(surfaceColor)
         ) {
             // Header
             Row(
@@ -77,20 +82,20 @@ fun CommentsBottomSheet(
                     text = "${comments.size} commentaire${if (comments.size > 1) "s" else ""}",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color.White
+                    color = onSurfaceColor
                 )
 
                 IconButton(onClick = onDismiss) {
                     Icon(
                         imageVector = Icons.Default.Close,
                         contentDescription = "Fermer",
-                        tint = Color.White
+                        tint = onSurfaceColor
                     )
                 }
             }
 
             HorizontalDivider(
-                color = Color.White.copy(alpha = 0.2f),
+                color = onSurfaceColor.copy(alpha = 0.2f),
                 thickness = 1.dp
             )
 
@@ -99,7 +104,7 @@ fun CommentsBottomSheet(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(Color(0xFF2A2A2A))
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
                         .padding(horizontal = 16.dp, vertical = 8.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
@@ -107,7 +112,7 @@ fun CommentsBottomSheet(
                     Text(
                         text = "Répondre à $replyToUsername",
                         fontSize = 14.sp,
-                        color = Color(0xFF00D4FF)
+                        color = secondaryColor
                     )
                     TextButton(
                         onClick = {
@@ -118,12 +123,12 @@ fun CommentsBottomSheet(
                         Text(
                             text = "Annuler",
                             fontSize = 12.sp,
-                            color = Color.White.copy(alpha = 0.7f)
+                            color = onSurfaceColor.copy(alpha = 0.7f)
                         )
                     }
                 }
                 HorizontalDivider(
-                    color = Color.White.copy(alpha = 0.2f),
+                    color = onSurfaceColor.copy(alpha = 0.2f),
                     thickness = 0.5.dp
                 )
             }
@@ -139,7 +144,7 @@ fun CommentsBottomSheet(
                     Text(
                         text = "Aucun commentaire",
                         fontSize = 16.sp,
-                        color = Color.White.copy(alpha = 0.6f)
+                        color = onSurfaceColor.copy(alpha = 0.6f)
                     )
                 }
             } else {
@@ -167,14 +172,14 @@ fun CommentsBottomSheet(
 
             // Champ de saisie de commentaire
             HorizontalDivider(
-                color = Color.White.copy(alpha = 0.2f),
+                color = onSurfaceColor.copy(alpha = 0.2f),
                 thickness = 1.dp
             )
 
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color(0xFF1A1A1A))
+                    .background(surfaceColor)
                     .padding(horizontal = 16.dp, vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -185,15 +190,15 @@ fun CommentsBottomSheet(
                     placeholder = {
                         Text(
                             text = if (replyToCommentId != null) "Écrivez une réponse..." else "Ajouter un commentaire...",
-                            color = Color.White.copy(alpha = 0.5f)
+                            color = onSurfaceColor.copy(alpha = 0.5f)
                         )
                     },
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = Color.White,
-                        unfocusedTextColor = Color.White,
-                        focusedBorderColor = Color(0xFF00D4FF),
-                        unfocusedBorderColor = Color.White.copy(alpha = 0.3f),
-                        cursorColor = Color(0xFF00D4FF)
+                        focusedTextColor = onSurfaceColor,
+                        unfocusedTextColor = onSurfaceColor,
+                        focusedBorderColor = secondaryColor,
+                        unfocusedBorderColor = onSurfaceColor.copy(alpha = 0.3f),
+                        cursorColor = secondaryColor
                     ),
                     shape = RoundedCornerShape(24.dp),
                     maxLines = 3
@@ -219,11 +224,13 @@ fun CommentsBottomSheet(
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.Send,
                         contentDescription = "Envoyer",
-                        tint = if (commentText.isNotBlank()) Color(0xFF00D4FF) else Color.White.copy(alpha = 0.3f)
+                        tint = if (commentText.isNotBlank()) secondaryColor else onSurfaceColor.copy(alpha = 0.3f)
                     )
                 }
             }
         }
     }
 }
+
+
 

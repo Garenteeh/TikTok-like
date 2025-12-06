@@ -9,35 +9,70 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = BluePrimary,
+    onPrimary = Color.White,
+    primaryContainer = BluePrimary,
+    onPrimaryContainer = Color.White,
+
+    secondary = BlueSecondary,
+    onSecondary = Color.Black,
+    secondaryContainer = BlueSecondary,
+    onSecondaryContainer = Color.Black,
+
+    tertiary = BlueTertiary,
+    onTertiary = Color.Black,
+
+    background = DarkBackground,
+    onBackground = OnDarkBackground,
+
+    surface = DarkSurface,
+    onSurface = OnDarkSurface,
+    surfaceVariant = DarkSurfaceVariant,
+    onSurfaceVariant = OnDarkSurface,
+
+    error = Red,
+    onError = Color.White
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
+    primary = BluePrimary,
     onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    primaryContainer = BlueTertiary,
+    onPrimaryContainer = Color.Black,
+
+    secondary = BlueSecondary,
+    onSecondary = Color.Black,
+    secondaryContainer = BlueTertiary,
+    onSecondaryContainer = Color.Black,
+
+    tertiary = BlueTertiary,
+    onTertiary = Color.Black,
+
+    background = LightBackground,
+    onBackground = OnLightBackground,
+
+    surface = LightSurface,
+    onSurface = OnLightSurface,
+    surfaceVariant = LightSurfaceVariant,
+    onSurfaceVariant = OnLightSurface,
+
+    error = RedLight,
+    onError = Color.White
 )
 
 @Composable
 fun TikTokAppTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    // Dynamic color désactivé pour utiliser nos couleurs personnalisées
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
@@ -50,9 +85,19 @@ fun TikTokAppTheme(
         else -> LightColorScheme
     }
 
+    val view = LocalView.current
+    if (!view.isInEditMode) {
+        SideEffect {
+            val window = (view.context as Activity).window
+            window.statusBarColor = colorScheme.background.toArgb()
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
+        }
+    }
+
     MaterialTheme(
         colorScheme = colorScheme,
         typography = Typography,
         content = content
     )
 }
+

@@ -55,7 +55,8 @@ fun NavGraph(
             HomeScreen(
                 viewModel = videoViewModel,
                 onNavigateToAddVideo = {/* TODO à implementer*/},
-                onNavigateToProfile = {navController.navigate(Destinations.PROFILE)}
+                onNavigateToProfile = {navController.navigate(Destinations.PROFILE)},
+                currentUsername = currentUser?.username ?: "Moi"
             )
         }
         composable(Destinations.PROFILE) {
