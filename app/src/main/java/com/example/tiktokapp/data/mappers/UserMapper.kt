@@ -7,8 +7,6 @@ import com.example.tiktokapp.domain.models.User
 /**
  * Mapper functions to convert between User data models
  */
-
-// Entity to Domain Model
 fun UserEntity.toDomain(): User {
     return User(
         firstName = this.firstName,
@@ -23,11 +21,8 @@ fun UserEntity.toDomain(): User {
     )
 }
 
-// Domain Model to Entity (for saving to DB)
 fun User.toEntity(): UserEntity {
-    return UserEntity(
-        // id est auto-généré par Room s'il vaut 0, sinon il met à jour l'existant
-        firstName = this.firstName,
+    return UserEntity(firstName = this.firstName,
         lastName = this.lastName,
         username = this.username,
         email = this.email,

@@ -32,12 +32,10 @@ class RegisterViewModel(
                 val result = registerUseCase("${user.firstName} ${user.lastName}", user.username, user.email, user.password)
                 if (result.isSuccess) {
                     val savedUser = result.getOrNull()!!
-                    // On sauvegarde le pseudo dans les prefs pour session persistante
                     prefs.edit().putString(LOGGED_USERNAME_KEY, savedUser.username).apply()
                     _registrationState.value = RegistrationState.Success
                 } else {
                     val ex = result.exceptionOrNull()
-                    // Map specific exceptions to field errors
                     when (ex) {
                         is com.example.tiktokapp.data.exceptions.EmailAlreadyTakenException -> {
                             _registrationState.value = RegistrationState.FieldErrors(mapOf("email" to "Email déjà utilisé"))

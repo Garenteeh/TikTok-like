@@ -33,11 +33,9 @@ interface UserDao {
     @Query("SELECT * FROM user WHERE username = :username AND password = :password")
     suspend fun loginWithUsernameAndPassword(username: String, password: String): UserEntity?
 
-    // Retourne true si un utilisateur existe avec cet email
     @Query("SELECT EXISTS(SELECT 1 FROM user WHERE email = :email)")
     suspend fun isEmailTaken(email: String): Boolean
 
-    // Retourne true si un utilisateur existe avec ce username
     @Query("SELECT EXISTS(SELECT 1 FROM user WHERE username = :username)")
     suspend fun isUsernameTaken(username: String): Boolean
 

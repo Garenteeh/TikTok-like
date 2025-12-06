@@ -45,20 +45,18 @@ object UserUtils {
             !hasLower -> "Doit contenir au moins une minuscule"
             !hasDigit -> "Doit contenir au moins un chiffre"
             !hasSpecial -> "Doit contenir au moins un caractère spécial"
-            else -> null // ✅ Mot de passe valide RGPD/ANSSI
+            else -> null
         }
     }
 
     fun validateBirthDate(date: String): String? {
         if(date.isBlank()) return "Date de naissance requise"
-        // Vérifie le format JJ/MM/AAAA
         if (!Regex("""\d{2}/\d{2}/\d{4}""").matches(date)) {
             return "Format attendu : JJ/MM/AAAA"
         }
 
         val (d, m, y) = date.split("/").map { it.toInt() }
 
-        // Vérification des plages
         if (m !in 1..12) return "Date invalide"
         if (y !in 1900..2025) return "Date invalide"
 
@@ -75,7 +73,7 @@ object UserUtils {
             return "Date invalide"
         }
 
-        return null // OK
+        return null
     }
 
     fun isLeapYear(year: Int): Boolean {
@@ -125,14 +123,11 @@ object UserUtils {
     }
 
     fun hashPassword(password: String): String {
-        // Garder pour compatibilité si nécessaire (SHA-256)
         val bytes = password.toByteArray()
         val md = MessageDigest.getInstance("SHA-256")
         val digest = md.digest(bytes)
         return digest.fold("") { str, it -> str + "%02x".format(it) }
     }
-
-    // Génère un sel sécurisé encodé en base64
     fun generateSalt(length: Int = 16): String {
         val random = SecureRandom()
         val salt = ByteArray(length)
@@ -140,7 +135,6 @@ object UserUtils {
         return Base64.getEncoder().encodeToString(salt)
     }
 
-    // Hash avec PBKDF2WithHmacSHA256 -> retourne hex string
     fun hashPasswordWithSalt(password: String, saltBase64: String, iterations: Int = 65536, keyLength: Int = 256): String {
         val salt = Base64.getDecoder().decode(saltBase64)
         val spec = PBEKeySpec(password.toCharArray(), salt, iterations, keyLength)

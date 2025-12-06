@@ -24,7 +24,6 @@ class UserRepositoryImpl(
             Log.e("UserRepositoryImpl", "Username already taken")
             throw UsernameAlreadyTakenException()
         }
-        // Générer un sel et hasher le mot de passe avec PBKDF2
         val salt = UserUtils.generateSalt()
         val hashedPassword = UserUtils.hashPasswordWithSalt(user.password, salt)
         val userToSave = user.copy(password = hashedPassword, salt = salt)
@@ -46,7 +45,6 @@ class UserRepositoryImpl(
         identifier: String,
         password: String
     ): User? {
-        // Récupérer l'utilisateur, hasher le mot de passe fourni avec le sel stocké, comparer
         val entity = if (identifier.contains("@")) {
             userDao.getUserByEmail(identifier)
         } else {

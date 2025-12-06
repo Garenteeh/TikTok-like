@@ -20,16 +20,12 @@ class AuthRepositoryImpl(
 
     override suspend fun login(email: String, password: String): Result<User> {
         return try {
-            // Essayer de récupérer l'utilisateur enregistré par email
             val entity = userDao.getUserByEmail(email) ?: return Result.failure(Exception("Utilisateur introuvable"))
-
-            // Hasher le mot de passe fourni avec le sel stocké et comparer
             val hashedProvided = UserUtils.hashPasswordWithSalt(password, entity.salt)
             if (entity.password != hashedProvided) {
                 return Result.failure(Exception("Identifiants invalides"))
             }
 
-            // Créer un token factice et le sauvegarder
             val token = AuthToken(
                 accessToken = "fake_access_${entity.username}_${System.currentTimeMillis()}",
                 refreshToken = "fake_refresh_${entity.username}_${System.currentTimeMillis()}",
@@ -37,7 +33,6 @@ class AuthRepositoryImpl(
             )
             tokenLocalDataSource.saveToken(token)
 
-            // Retourner l'utilisateur en domaine
             Result.success(entity.toDomain())
         } catch (e: Exception) {
             Result.failure(e)
@@ -46,17 +41,14 @@ class AuthRepositoryImpl(
 
     override suspend fun register(name: String, username: String, email: String, password: String): Result<User> {
         return try {
-            // Vérifier si l'email est déjà pris
             if (userDao.isEmailTaken(email)) {
                 return Result.failure(EmailAlreadyTakenException())
             }
 
-            // Déterminer prénom / nom à partir du champ name
             val parts = name.trim().split(" ", limit = 2)
             val firstName = parts.getOrNull(0) ?: ""
             val lastName = parts.getOrNull(1) ?: ""
 
-            // Use provided username if present, otherwise generate one
             var finalUsername = username.trim()
             if (finalUsername.isBlank()) {
                 var baseUsername = if (firstName.isNotBlank()) {
@@ -74,15 +66,12 @@ class AuthRepositoryImpl(
                 }
             }
 
-            // If finalUsername already exists, return an error
             if (userDao.isUsernameTaken(finalUsername)) {
                 return Result.failure(UsernameAlreadyTakenException())
             }
-            // Générer sel et hasher le mot de passe
             val salt = UserUtils.generateSalt()
             val hashedPassword = UserUtils.hashPasswordWithSalt(password, salt)
 
-            // Construire l'entité utilisateur avec valeurs par défaut pour les champs manquants
             val userToSave = User(
                 firstName = firstName,
                 lastName = lastName,
@@ -95,14 +84,11 @@ class AuthRepositoryImpl(
                 salt = salt
             )
 
-            // Convertir en entity et insérer
             val entity = userToSave.toEntity()
             userDao.insertUser(entity)
 
-            // Récupérer l'utilisateur inséré
             val saved = userDao.getUserByEmail(email) ?: return Result.failure(Exception("Erreur lors de la création de l'utilisateur"))
 
-            // Générer token factice et sauvegarder
             val token = AuthToken(
                 accessToken = "fake_access_${saved.username}_${System.currentTimeMillis()}",
                 refreshToken = "fake_refresh_${saved.username}_${System.currentTimeMillis()}",
@@ -120,7 +106,6 @@ class AuthRepositoryImpl(
         return try {
             val token = tokenLocalDataSource.getToken()
             if (token == null) return Result.failure(Exception("No token"))
-            // Ici on ne contacte pas de serveur, on simule le refresh
             val newToken = AuthToken(
                 accessToken = "refreshed_${token.accessToken}",
                 refreshToken = token.refreshToken,

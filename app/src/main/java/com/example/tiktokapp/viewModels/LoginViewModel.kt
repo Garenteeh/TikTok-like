@@ -32,7 +32,6 @@ class LoginViewModel(
     private val _currentUser = MutableStateFlow<User?>(null)
     val currentUser: StateFlow<User?> = _currentUser.asStateFlow()
 
-    // Indicateur que la tentative de restauration a été effectuée (true même si user est null)
     private val _restored = MutableStateFlow(false)
     val restored: StateFlow<Boolean> = _restored.asStateFlow()
 
@@ -53,7 +52,6 @@ class LoginViewModel(
                 }
             }
         } else {
-            // Pas d'username sauvegardé -> restauration terminée
             _restored.value = true
         }
     }

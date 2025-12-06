@@ -41,16 +41,12 @@ class MainActivity : ComponentActivity() {
                     val videoViewModel = VideoListViewModel(
                         application = application
                     )
-
-                    // Créer les dépendances nécessaires
                     val db = DatabaseProvider.provide(application)
                     val tokenLocal = TokenLocalDataSource(application)
                     val authRepo = AuthRepositoryImpl(db.userDao(), tokenLocal)
 
                     val loginUseCase = LoginUseCase(authRepo)
                     val registerUseCase = RegisterUseCase(authRepo)
-
-                    // Fournir les ViewModels via une factory
                     val factory = AuthViewModelFactory(application, loginUseCase, registerUseCase)
                     val provider = ViewModelProvider(this, factory)
                     val loginViewModel = provider[LoginViewModel::class.java]

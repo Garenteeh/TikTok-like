@@ -61,7 +61,6 @@ fun SignupScreen(
     var birthDate: String by remember { mutableStateOf("") }
     var selectedCountry: Country? by remember { mutableStateOf<Country?>(null) }
 
-    // États pour erreurs — utiliser mutableStateMapOf pour être observable
     val errors = remember { mutableStateMapOf<String, String>() }
 
     val scrollState = rememberScrollState()
@@ -81,7 +80,6 @@ fun SignupScreen(
                 Toast.makeText(context, "Inscription réussie", Toast.LENGTH_SHORT).show()
                 errors.clear()
                 registerViewModel.resetState()
-                // navigation to home (or next) only after successful registration
                 onSignupSucess()
             }
             is RegistrationState.Error -> {
@@ -243,7 +241,6 @@ fun SignupScreen(
         Button(
             onClick = {
                 val countryName = selectedCountry?.name ?: ""
-                // Appel de la fonction de validation centrale
                 val validationErrors = validateAll(
                     firstName = firstName,
                     lastName = lastName,
@@ -257,7 +254,6 @@ fun SignupScreen(
                 )
 
                 if (validationErrors.isEmpty()) {
-                    // Aucun problème : procéder à l'inscription
                     errors.clear()
                     val newUser = User(
                         firstName = firstName,
@@ -272,7 +268,6 @@ fun SignupScreen(
                     registerViewModel.registerUser(newUser)
 
                 } else {
-                    // Il y a des erreurs : les afficher
                     errors.putAll(validationErrors)
                 }
             },

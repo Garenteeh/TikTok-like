@@ -13,12 +13,10 @@ data class Country(
  */
 fun Country.flagEmoji(): String {
     return code
-        .uppercase() // "fr" -> "FR"
+        .uppercase()
         .map { char ->
-            // Convertit chaque lettre en code point du drapeau
             Character.codePointAt(charArrayOf(char), 0) - 0x41 + 0x1F1E6
         }.joinToString("") { codePoint ->
-            // Transforme le code point en String (emoji)
             String(Character.toChars(codePoint))
         }
 }
