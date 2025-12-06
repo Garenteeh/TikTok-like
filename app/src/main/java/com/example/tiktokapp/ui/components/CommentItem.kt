@@ -28,7 +28,10 @@ fun CommentItem(
     modifier: Modifier = Modifier,
     isReply: Boolean = false,
     onLikeClick: (String) -> Unit = {},
-    onReplyClick: (String, String) -> Unit = { _, _ -> }
+    onReplyClick: (String, String) -> Unit = { _, _ -> },
+    onDeleteClick: (String) -> Unit = {},
+    currentUsername: String = "Moi",
+    videoOwner: String = ""
 ) {
     var showReplies by remember { mutableStateOf(false) }
     var visibleRepliesCount by remember { mutableStateOf(4) }
@@ -95,6 +98,25 @@ fun CommentItem(
                         fontWeight = FontWeight.Medium
                     )
                 }
+
+                // Bouton Supprimer (si l'utilisateur peut supprimer ce commentaire)
+                val canDelete = comment.user == currentUsername || videoOwner == currentUsername
+                if (canDelete) {
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    TextButton(
+                        onClick = { onDeleteClick(comment.id) },
+                        contentPadding = PaddingValues(0.dp),
+                        modifier = Modifier.height(24.dp)
+                    ) {
+                        Text(
+                            text = "Supprimer",
+                            fontSize = 12.sp,
+                            color = Color(0xFFFF0050).copy(alpha = 0.8f),
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
             }
 
             // Bouton de like
@@ -130,7 +152,7 @@ fun CommentItem(
         }
 
         // Bouton pour afficher/masquer les réponses
-        if (hasReplies && !isReply) {
+        if (hasReplies) {
             Spacer(modifier = Modifier.height(8.dp))
 
             TextButton(
@@ -162,7 +184,10 @@ fun CommentItem(
                     comment = reply,
                     isReply = true,
                     onLikeClick = onLikeClick,
-                    onReplyClick = onReplyClick
+                    onReplyClick = onReplyClick,
+                    onDeleteClick = onDeleteClick,
+                    currentUsername = currentUsername,
+                    videoOwner = videoOwner
                 )
             }
 
@@ -194,9 +219,6 @@ fun CommentItem(
     }
 }
 
-/**
- * Formate le timestamp en format relatif (ex: "il y a 2h")
- */
 private fun formatTimestamp(timestamp: Long): String {
     val now = System.currentTimeMillis()
     val diff = now - timestamp
@@ -213,9 +235,7 @@ private fun formatTimestamp(timestamp: Long): String {
     }
 }
 
-/**
- * Formate le nombre de likes (ex: 1k, 10.1k, 1M)
- */
+
 private fun formatLikes(count: Int): String {
     return when {
         count < 1000 -> count.toString()

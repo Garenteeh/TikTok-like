@@ -11,9 +11,7 @@ class CommentRepositoryImpl(
     private val commentDao: CommentDao
 ) : CommentRepository {
 
-    /**
-     * Get all comments for a specific video with their replies hierarchy
-     */
+
     override suspend fun getCommentsForVideo(videoId: String): List<Comment> {
         return try {
             val commentEntities = commentDao.getCommentsForVideo(videoId)
@@ -24,10 +22,7 @@ class CommentRepositoryImpl(
         }
     }
 
-    /**
-     * Save a new comment to the database
-     * If parentCommentId is provided, it will be saved as a reply
-     */
+
     override suspend fun saveComment(videoId: String, comment: Comment, parentCommentId: String?) {
         try {
             val commentEntities = flattenComments(listOf(comment), videoId, parentCommentId)
@@ -38,10 +33,7 @@ class CommentRepositoryImpl(
         }
     }
 
-    /**
-     * Save multiple comments (useful for API sync)
-     * Flattens the entire comment tree and saves all comments and replies
-     */
+
     override suspend fun saveComments(videoId: String, comments: List<Comment>) {
         try {
             if (comments.isEmpty()) return
@@ -54,9 +46,7 @@ class CommentRepositoryImpl(
         }
     }
 
-    /**
-     * Update a comment's like status in the database
-     */
+
     override suspend fun updateCommentLike(commentId: String, likes: Int, isLiked: Boolean) {
         try {
             commentDao.updateCommentLike(commentId, likes, isLiked)
@@ -66,9 +56,7 @@ class CommentRepositoryImpl(
         }
     }
 
-    /**
-     * Delete all comments for a specific video
-     */
+
     override suspend fun deleteCommentsForVideo(videoId: String) {
         try {
             commentDao.deleteCommentsForVideo(videoId)
@@ -78,15 +66,29 @@ class CommentRepositoryImpl(
         }
     }
 
-    /**
-     * Delete all comments from the database
-     */
+
     override suspend fun deleteAllComments() {
         try {
             commentDao.deleteAllComments()
             Log.d("CommentRepositoryImpl", "Deleted all comments")
         } catch (e: Exception) {
             Log.e("CommentRepositoryImpl", "Error deleting all comments", e)
+        }
+    }
+
+
+    override suspend fun deleteComment(commentId: String) {
+        try {
+            val replies = commentDao.getRepliesForComment(commentId)
+
+            replies.forEach { reply ->
+                deleteComment(reply.id)
+            }
+
+            commentDao.deleteComment(commentId)
+            Log.d("CommentRepositoryImpl", "Deleted comment $commentId and its replies")
+        } catch (e: Exception) {
+            Log.e("CommentRepositoryImpl", "Error deleting comment $commentId", e)
         }
     }
 }

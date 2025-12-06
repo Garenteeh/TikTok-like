@@ -12,7 +12,6 @@ class VideoRemoteDataSource {
             val videos = RetrofitClient.api.getVideos(count)
             Log.d("VideoRemoteDataSource", "Successfully fetched ${videos.size} videos")
 
-            // Convert to DTO
             videos.map { video ->
                 VideoDto(
                     id = video.id,

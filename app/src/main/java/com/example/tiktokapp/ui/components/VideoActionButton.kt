@@ -42,7 +42,6 @@ fun VideoActionButton(
         label = "scale"
     )
 
-    // Animation de la couleur
     val color by animateColorAsState(
         targetValue = if (isActive) activeColor else inactiveColor,
         animationSpec = tween(durationMillis = 200),

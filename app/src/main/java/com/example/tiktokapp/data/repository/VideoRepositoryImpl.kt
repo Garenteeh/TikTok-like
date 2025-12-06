@@ -15,9 +15,7 @@ class VideoRepositoryImpl(
     private val remoteDataSource: VideoRemoteDataSource = VideoRemoteDataSource()
 ) : VideoRepository {
 
-    /**
-     * Get all videos from local database with their comments
-     */
+
     override suspend fun getAllVideos(): List<Video> {
         return try {
             val entities = videoDao.getAllVideos()
@@ -31,9 +29,7 @@ class VideoRepositoryImpl(
         }
     }
 
-    /**
-     * Get a specific video by ID from local database with comments
-     */
+
     override suspend fun getVideoById(id: String): Video? {
         return try {
             val videoEntity = videoDao.getVideoById(id) ?: return null
@@ -45,22 +41,17 @@ class VideoRepositoryImpl(
         }
     }
 
-    /**
-     * Fetch videos from remote API and save to local database
-     */
+
     override suspend fun fetchRemoteVideos(count: Int): List<Video> {
         return try {
             Log.d("VideoRepositoryImpl", "Fetching videos from API...")
 
-            // Fetch from API
             val remoteDtos = remoteDataSource.fetchVideos(count)
 
-            // Convert DTOs to entities and save to DB
             val entities = remoteDtos.map { it.toEntity() }
             videoDao.insertAll(entities)
             Log.d("VideoRepositoryImpl", "Saved ${entities.size} videos to DB")
 
-            // Save comments to DB via CommentRepository
             remoteDtos.forEach { videoDto ->
                 val comments = videoDto.comments ?: emptyList()
                 if (comments.isNotEmpty()) {
@@ -68,18 +59,14 @@ class VideoRepositoryImpl(
                 }
             }
 
-            // Return as domain models
             remoteDtos.map { it.toDomain() }
         } catch (e: Exception) {
             Log.e("VideoRepositoryImpl", "Error fetching remote videos", e)
-            // If fetch fails, return data from local DB
             getAllVideos()
         }
     }
 
-    /**
-     * Refresh videos: clear local DB and fetch new ones from API
-     */
+
     override suspend fun refreshVideos(count: Int): List<Video> {
         return try {
             videoDao.deleteAllVideos()
@@ -91,9 +78,7 @@ class VideoRepositoryImpl(
         }
     }
 
-    /**
-     * Toggle like status for a video
-     */
+
     override suspend fun toggleLike(videoId: String): Video? {
         return try {
             val video = videoDao.getVideoById(videoId) ?: return null

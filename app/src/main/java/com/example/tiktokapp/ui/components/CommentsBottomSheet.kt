@@ -26,6 +26,9 @@ fun CommentsBottomSheet(
     onLikeClick: (String) -> Unit = {},
     onAddComment: (String) -> Unit = {},
     onReplyToComment: (String, String) -> Unit = { _, _ -> },
+    onDeleteComment: (String) -> Unit = {},
+    currentUsername: String = "Moi",
+    videoOwner: String = "",
     modifier: Modifier = Modifier
 ) {
     var commentText by remember { mutableStateOf("") }
@@ -153,7 +156,10 @@ fun CommentsBottomSheet(
                             onReplyClick = { commentId, username ->
                                 replyToCommentId = commentId
                                 replyToUsername = username
-                            }
+                            },
+                            onDeleteClick = onDeleteComment,
+                            currentUsername = currentUsername,
+                            videoOwner = videoOwner
                         )
                     }
                 }

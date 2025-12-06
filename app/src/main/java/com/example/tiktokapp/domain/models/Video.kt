@@ -20,9 +20,7 @@ data class Video(
         return count(comments)
     }
 
-    /**
-     * Format number for display (1k, 10.1k, 1M, etc.)
-     */
+
     fun formatCount(count: Int): String {
         return when {
             count < 1000 -> count.toString()

@@ -33,5 +33,10 @@ interface CommentRepository {
      * Delete all comments
      */
     suspend fun deleteAllComments()
+
+    /**
+     * Delete a specific comment and all its replies
+     */
+    suspend fun deleteComment(commentId: String)
 }
 

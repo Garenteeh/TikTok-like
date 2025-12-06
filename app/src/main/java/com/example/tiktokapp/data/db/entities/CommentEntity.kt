@@ -8,7 +8,7 @@ data class CommentEntity(
     @PrimaryKey
     val id: String,
     val videoId: String,
-    val parentCommentId: String? = null, // null si c'est un commentaire principal
+    val parentCommentId: String? = null,
     val message: String,
     val user: String,
     val timestamp: Long,

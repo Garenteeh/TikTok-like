@@ -32,5 +32,11 @@ interface CommentDao {
 
     @Query("DELETE FROM comments")
     suspend fun deleteAllComments()
+
+    @Query("DELETE FROM comments WHERE id = :commentId")
+    suspend fun deleteComment(commentId: String)
+
+    @Query("DELETE FROM comments WHERE parentCommentId = :commentId")
+    suspend fun deleteRepliesForComment(commentId: String)
 }
 

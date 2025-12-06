@@ -34,7 +34,6 @@ fun HomeScreen(
     val videos by viewModel.videos.observeAsState(emptyList())
     val isLoading by viewModel.isLoading.observeAsState(false)
 
-    // État pour gérer l'ouverture des commentaires - on stocke l'ID au lieu de la vidéo entière
     var selectedVideoId by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(videos) {
@@ -107,8 +106,6 @@ fun HomeScreen(
         }
     }
 
-    // BottomSheet pour afficher les commentaires
-    // On récupère la vidéo à jour depuis la liste videos pour que les commentaires soient réactifs
     selectedVideoId?.let { videoId ->
         val selectedVideo = videos.find { it.id == videoId }
         selectedVideo?.let { video ->
@@ -123,7 +120,12 @@ fun HomeScreen(
                 },
                 onReplyToComment = { commentId, message ->
                     viewModel.addReplyToComment(video.id, commentId, message)
-                }
+                },
+                onDeleteComment = { commentId ->
+                    viewModel.deleteComment(video.id, commentId)
+                },
+                currentUsername = "Moi",
+                videoOwner = video.user
             )
         }
     }
