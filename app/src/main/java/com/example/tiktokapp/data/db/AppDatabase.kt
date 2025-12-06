@@ -2,8 +2,10 @@ package com.example.tiktokapp.data.db
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import com.example.tiktokapp.data.db.dao.CommentDao
 import com.example.tiktokapp.data.db.dao.UserDao
 import com.example.tiktokapp.data.db.dao.VideoDao
+import com.example.tiktokapp.data.db.entities.CommentEntity
 import com.example.tiktokapp.data.db.entities.UserEntity
 import com.example.tiktokapp.data.db.entities.VideoEntity
 
@@ -12,10 +14,12 @@ import com.example.tiktokapp.data.db.entities.VideoEntity
         VideoEntity::class,
         UserEntity::class
     ],
-    version = 1,
+    entities = [VideoEntity::class, CommentEntity::class],
+    version = 3,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun videoDao(): VideoDao
+    abstract fun commentDao(): CommentDao
     abstract fun userDao(): UserDao
 }

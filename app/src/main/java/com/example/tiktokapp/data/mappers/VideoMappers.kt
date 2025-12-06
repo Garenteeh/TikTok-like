@@ -4,11 +4,7 @@ import com.example.tiktokapp.data.db.entities.VideoEntity
 import com.example.tiktokapp.domain.models.Video
 import com.example.tiktokapp.domain.models.dto.VideoDto
 
-/**
- * Mapper functions to convert between different data models
- */
 
-// DTO to Domain Model
 fun VideoDto.toDomain(): Video {
     return Video(
         id = this.id,
@@ -22,7 +18,6 @@ fun VideoDto.toDomain(): Video {
     )
 }
 
-// DTO to Entity
 fun VideoDto.toEntity(): VideoEntity {
     return VideoEntity(
         id = this.id,
@@ -35,7 +30,6 @@ fun VideoDto.toEntity(): VideoEntity {
     )
 }
 
-// Entity to Domain Model
 fun VideoEntity.toDomain(): Video {
     return Video(
         id = this.id,
@@ -45,11 +39,11 @@ fun VideoEntity.toDomain(): Video {
         likes = this.likes,
         shares = this.shares,
         reposts = this.reposts,
-        comments = emptyList() // Comments are not stored in local DB
+        comments = emptyList(),
+        isLiked = this.isLiked
     )
 }
 
-// Domain Model to Entity (for saving to DB)
 fun Video.toEntity(): VideoEntity {
     return VideoEntity(
         id = this.id,
@@ -58,7 +52,8 @@ fun Video.toEntity(): VideoEntity {
         user = this.user,
         likes = this.likes,
         shares = this.shares,
-        reposts = this.reposts
+        reposts = this.reposts,
+        isLiked = this.isLiked
     )
 }
 

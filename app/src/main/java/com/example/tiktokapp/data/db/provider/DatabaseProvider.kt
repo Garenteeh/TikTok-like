@@ -11,7 +11,9 @@ object DatabaseProvider {
             context.applicationContext,
             AppDatabase::class.java,
             "tiktok_videos_db"
-        ).build()
+        )
+            .fallbackToDestructiveMigration()
+            .build()
     }
 }
 

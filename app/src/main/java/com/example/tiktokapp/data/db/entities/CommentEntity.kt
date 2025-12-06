@@ -3,17 +3,16 @@ package com.example.tiktokapp.data.db.entities
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "videos")
-data class VideoEntity(
+@Entity(tableName = "comments")
+data class CommentEntity(
     @PrimaryKey
     val id: String,
-    val url: String,
-    val title: String,
+    val videoId: String,
+    val parentCommentId: String? = null,
+    val message: String,
     val user: String,
+    val timestamp: Long,
     val likes: Int = 0,
-    val shares: Int = 0,
-    val reposts: Int = 0,
-    val timestamp: Long = System.currentTimeMillis(),
     val isLiked: Boolean = false
 )
 
