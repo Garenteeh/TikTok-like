@@ -1,8 +1,7 @@
 package com.example.tiktokapp.data.utils
 
-import java.security.MessageDigest
 import java.security.SecureRandom
-import java.util.Base64
+import android.util.Base64
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.PBEKeySpec
 
@@ -122,21 +121,15 @@ object UserUtils {
         return errors
     }
 
-    fun hashPassword(password: String): String {
-        val bytes = password.toByteArray()
-        val md = MessageDigest.getInstance("SHA-256")
-        val digest = md.digest(bytes)
-        return digest.fold("") { str, it -> str + "%02x".format(it) }
-    }
     fun generateSalt(length: Int = 16): String {
         val random = SecureRandom()
         val salt = ByteArray(length)
         random.nextBytes(salt)
-        return Base64.getEncoder().encodeToString(salt)
+        return Base64.encodeToString(salt, Base64.NO_WRAP)
     }
 
     fun hashPasswordWithSalt(password: String, saltBase64: String, iterations: Int = 65536, keyLength: Int = 256): String {
-        val salt = Base64.getDecoder().decode(saltBase64)
+        val salt = Base64.decode(saltBase64, Base64.DEFAULT)
         val spec = PBEKeySpec(password.toCharArray(), salt, iterations, keyLength)
         val skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256")
         val key = skf.generateSecret(spec).encoded
