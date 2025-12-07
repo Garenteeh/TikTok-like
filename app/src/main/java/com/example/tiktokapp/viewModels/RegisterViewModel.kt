@@ -5,6 +5,8 @@ import android.content.Context
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.tiktokapp.data.exceptions.EmailAlreadyTakenException
+import com.example.tiktokapp.data.exceptions.UsernameAlreadyTakenException
 import com.example.tiktokapp.domain.models.User
 import com.example.tiktokapp.domain.usecases.RegisterUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -37,10 +39,10 @@ class RegisterViewModel(
                 } else {
                     val ex = result.exceptionOrNull()
                     when (ex) {
-                        is com.example.tiktokapp.data.exceptions.EmailAlreadyTakenException -> {
+                        is EmailAlreadyTakenException -> {
                             _registrationState.value = RegistrationState.FieldErrors(mapOf("email" to "Email déjà utilisé"))
                         }
-                        is com.example.tiktokapp.data.exceptions.UsernameAlreadyTakenException -> {
+                        is UsernameAlreadyTakenException -> {
                             _registrationState.value = RegistrationState.FieldErrors(mapOf("username" to "Pseudo déjà utilisé"))
                         }
                         else -> {

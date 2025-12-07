@@ -56,6 +56,7 @@ fun BaseTextField(
 
             OutlinedTextField(
                 value = value,
+                singleLine = true,
                 onValueChange = onValueChange,
                 label = { Text(label) },
                 isError = errorMessage.isNotEmpty(),
