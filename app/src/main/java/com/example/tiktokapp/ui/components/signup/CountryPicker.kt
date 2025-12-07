@@ -15,9 +15,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.tiktokapp.models.Country
+import com.example.tiktokapp.domain.models.Country
 import com.example.tiktokapp.R
-import com.example.tiktokapp.models.flagEmoji
+import com.example.tiktokapp.domain.models.flagEmoji
 
 @Composable
 fun CountryPicker(

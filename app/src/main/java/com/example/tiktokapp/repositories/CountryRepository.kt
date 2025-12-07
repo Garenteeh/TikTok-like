@@ -1,6 +1,6 @@
 package com.example.tiktokapp.repositories
 
-import com.example.tiktokapp.models.Country
+import com.example.tiktokapp.domain.models.Country
 
 object CountryRepository {
     val countries = listOf(

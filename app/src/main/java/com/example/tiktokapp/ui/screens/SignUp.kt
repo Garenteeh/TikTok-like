@@ -35,7 +35,7 @@ import androidx.compose.ui.unit.dp
 import com.example.tiktokapp.R
 import com.example.tiktokapp.data.utils.UserUtils.validateAll
 import com.example.tiktokapp.domain.models.User
-import com.example.tiktokapp.models.Country
+import com.example.tiktokapp.domain.models.Country
 import com.example.tiktokapp.repositories.CountryRepository
 import com.example.tiktokapp.ui.components.signup.BaseTextField
 import com.example.tiktokapp.ui.components.signup.BirthDateTextField
