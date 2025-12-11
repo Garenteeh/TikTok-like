@@ -94,5 +94,15 @@ class VideoRepositoryImpl(
             null
         }
     }
-}
 
+    override suspend fun createVideo(video: Video): Video? {
+        return try {
+            val videoEntity = video.toEntity()
+            videoDao.insertVideo(videoEntity)
+            videoDao.getVideoById(video.id)?.toDomain()
+        } catch (e: Exception) {
+            Log.e("VideoRepositoryImpl", "Error creating video", e)
+            null
+        }
+    }
+}
