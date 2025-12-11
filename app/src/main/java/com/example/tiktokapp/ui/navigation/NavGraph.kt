@@ -1,10 +1,8 @@
 package com.example.tiktokapp.ui.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -15,17 +13,18 @@ import com.example.tiktokapp.ui.screens.ProfileScreen
 import com.example.tiktokapp.viewModels.LoginViewModel
 import com.example.tiktokapp.viewModels.RegisterViewModel
 import com.example.tiktokapp.viewModels.VideoListViewModel
-import kotlinx.coroutines.launch
+import com.example.tiktokapp.ui.screens.CreateVideoScreen
+import com.example.tiktokapp.viewModels.CreateVideoViewModel
 
 @Composable
 fun NavGraph(
     loginViewModel: LoginViewModel,
     registerViewModel: RegisterViewModel,
     videoViewModel: VideoListViewModel,
+    createVideoViewModel: CreateVideoViewModel
 ) {
     val navController = rememberNavController()
 
-    // Déterminer la destination de départ directement depuis currentUser
     val currentUser by loginViewModel.currentUser.collectAsState()
 
     val startDestination = if (currentUser != null) Destinations.HOME else Destinations.LOGIN
@@ -54,14 +53,14 @@ fun NavGraph(
         composable(Destinations.HOME) {
             HomeScreen(
                 viewModel = videoViewModel,
-                onNavigateToAddVideo = {/* TODO à implementer*/},
+                onNavigateToAddVideo = { navController.navigate(Destinations.CREATE_VIDEO) },
                 onNavigateToProfile = {navController.navigate(Destinations.PROFILE)},
                 currentUsername = currentUser?.username ?: "Moi"
             )
         }
         composable(Destinations.PROFILE) {
             ProfileScreen(
-                user = loginViewModel.currentUser.value,
+                user = currentUser,
                 onLogout = {
                     loginViewModel.logout()
                     navController.navigate(Destinations.LOGIN) {
@@ -71,8 +70,23 @@ fun NavGraph(
                 onHome = { navController.navigate(Destinations.HOME) {
                     popUpTo(Destinations.PROFILE) { inclusive = true }
                 } },
-                onAdd = { navController.navigate(Destinations.HOME) }
+                onAdd = { navController.navigate(Destinations.CREATE_VIDEO) }
             )
+        }
+
+        composable(Destinations.CREATE_VIDEO) {
+            CreateVideoScreen(
+                currentUsername = currentUser?.username ?: "Moi",
+                viewModel = createVideoViewModel,
+                onSaved = {
+                navController.navigate(Destinations.HOME) {
+                        popUpTo(Destinations.HOME) { inclusive = true }
+                    }
+                },
+                onNavigateHome = { navController.navigate(Destinations.CREATE_VIDEO) },
+                onNavigateToProfile = {navController.navigate(Destinations.PROFILE)},
+            )
+
         }
     }
 
