@@ -36,7 +36,7 @@ fun BottomBar(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
+            .padding(bottom = 32.dp)
             .background(Color(0x00FFFFFF)),
     ) {
         Row(

@@ -104,6 +104,7 @@ fun ProfileScreen(
                             text = "Informations personnelles",
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.padding(bottom = 16.dp)
                         )
 

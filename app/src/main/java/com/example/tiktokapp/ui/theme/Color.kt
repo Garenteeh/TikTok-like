@@ -22,7 +22,7 @@ val LightSurface = Color(0xFFF5F5F5)
 val LightBackground = Color(0xFFFFFFFF)
 // Light Mode Colors
 
-val OnDarkSurface = Color(0xFFE0E0E0)
+val OnDarkSurface = Color(0xFF6D6D6D)
 val OnDarkBackground = Color(0xFFFFFFFF)
 val DarkSurfaceVariant = Color(0xFF2A2A2A)
 val DarkSurface = Color(0xFF1A1A1A)

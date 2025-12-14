@@ -21,6 +21,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -69,11 +70,12 @@ fun HomeScreen(
     Scaffold(
         modifier = modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
-        containerColor = MaterialTheme.colorScheme.background,
+            .background(Color.Transparent),
+        containerColor = Color.Transparent,
         bottomBar = {
             BottomBar(onHome = {}, onAdd = onNavigateToAddVideo, onProfile = onNavigateToProfile)
         }
+
     ) { paddingValues ->
         // Calculer la hauteur disponible pour les vidéos (hauteur écran - bottom bar)
         val videoHeight = screenHeight - paddingValues.calculateBottomPadding()
@@ -96,7 +98,7 @@ fun HomeScreen(
                         icon = Icons.Default.Favorite,
                         text = video.formatCount(video.likes),
                         isActive = video.isLiked,
-                        activeColor = androidx.compose.ui.graphics.Color.Red,
+                        activeColor = Color.Red,
                         onClick = { viewModel.toggleLike(video.id) }
                     )
                     VideoActionButton(
