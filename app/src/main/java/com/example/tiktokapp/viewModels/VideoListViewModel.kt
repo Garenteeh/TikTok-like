@@ -1,6 +1,7 @@
 package com.example.tiktokapp.viewModels
 
 import android.app.Application
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -14,6 +15,7 @@ import com.example.tiktokapp.domain.models.Video
 import com.example.tiktokapp.domain.repository.CommentRepository
 import com.example.tiktokapp.domain.repository.VideoRepository
 import kotlinx.coroutines.launch
+import java.util.*
 
 class VideoListViewModel(
     application: Application
@@ -30,6 +32,16 @@ class VideoListViewModel(
         commentDao = database.commentDao()
     )
 
+
+    private val _isSaving = MutableLiveData(false)
+    val isSaving: LiveData<Boolean> = _isSaving
+
+    private val _error = MutableLiveData<String?>(null)
+    val error: LiveData<String?> = _error
+
+    private val _saved = MutableLiveData<Boolean>(false)
+    val saved: LiveData<Boolean> = _saved
+
     private val _videos = MutableLiveData<List<Video>>(emptyList())
     val videos: LiveData<List<Video>> = _videos
 
@@ -42,7 +54,51 @@ class VideoListViewModel(
         loadMoreVideos()
     }
 
+    fun saveVideo(uri: Uri?, title: String, user: String) {
+        if (uri == null) {
+            _error.value = "Aucune vidéo sélectionnée"
+            return
+        }
 
+        _isSaving.value = true
+
+        viewModelScope.launch {
+            try {
+                val video = Video(
+                    id = UUID.randomUUID().toString(),
+                    url = uri.toString(),
+                    title = title.ifBlank { "Sans titre" },
+                    user = user,
+                    likes = 0,
+                    shares = 0,
+                    reposts = 0,
+                    comments = emptyList<Comment>(),
+                    isLiked = false
+                )
+
+                val created = videoRepository.createVideo(video)
+
+                if (created != null) {
+                    // ajouter la vidéo nouvellement créée en tête de la liste observable
+                    val current = _videos.value ?: emptyList()
+                    _videos.value = listOf(created) + current
+                    _saved.value = true
+                } else {
+                    _error.value = "Impossible de sauvegarder la vidéo"
+                    _saved.value = false
+                }
+            } catch (e: Exception) {
+                _error.value = e.message ?: "Erreur lors de la sauvegarde"
+                _saved.value = false
+            } finally {
+                _isSaving.value = false
+            }
+        }
+    }
+
+    fun clearSavedFlag() {
+        _saved.value = false
+    }
     private fun loadVideosFromDb() {
         viewModelScope.launch {
             try {
@@ -156,7 +212,7 @@ class VideoListViewModel(
 
         viewModelScope.launch {
             val newComment = Comment(
-                id = java.util.UUID.randomUUID().toString(),
+                id = UUID.randomUUID().toString(),
                 message = message,
                 user = username,
                 timestamp = System.currentTimeMillis(),
@@ -184,7 +240,7 @@ class VideoListViewModel(
 
         viewModelScope.launch {
             val newReply = Comment(
-                id = java.util.UUID.randomUUID().toString(),
+                id = UUID.randomUUID().toString(),
                 message = message,
                 user = username,
                 timestamp = System.currentTimeMillis(),

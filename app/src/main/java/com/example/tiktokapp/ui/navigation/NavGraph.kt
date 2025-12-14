@@ -14,14 +14,12 @@ import com.example.tiktokapp.viewModels.LoginViewModel
 import com.example.tiktokapp.viewModels.RegisterViewModel
 import com.example.tiktokapp.viewModels.VideoListViewModel
 import com.example.tiktokapp.ui.screens.CreateVideoScreen
-import com.example.tiktokapp.viewModels.CreateVideoViewModel
 
 @Composable
 fun NavGraph(
     loginViewModel: LoginViewModel,
     registerViewModel: RegisterViewModel,
     videoViewModel: VideoListViewModel,
-    createVideoViewModel: CreateVideoViewModel
 ) {
     val navController = rememberNavController()
 
@@ -77,7 +75,7 @@ fun NavGraph(
         composable(Destinations.CREATE_VIDEO) {
             CreateVideoScreen(
                 currentUsername = currentUser?.username ?: "Moi",
-                viewModel = createVideoViewModel,
+                viewModel = videoViewModel,
                 onSaved = {
                 navController.navigate(Destinations.HOME) {
                         popUpTo(Destinations.HOME) { inclusive = true }

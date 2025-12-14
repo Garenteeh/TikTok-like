@@ -1,6 +1,5 @@
 package com.example.tiktokapp.ui.screens
 
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
@@ -8,27 +7,28 @@ import android.provider.MediaStore
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.tiktokapp.ui.components.BottomBar
-import com.example.tiktokapp.viewModels.CreateVideoViewModel
-import com.example.tiktokapp.ui.components.VideoPlayer
+import com.example.tiktokapp.ui.components.CreateVideoControls
+import com.example.tiktokapp.ui.components.CreatedVideoPreviewPlayer
+import com.example.tiktokapp.viewModels.VideoListViewModel
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun CreateVideoScreen(
-    viewModel: CreateVideoViewModel = viewModel(),
+    viewModel: VideoListViewModel = viewModel(),
     currentUsername: String = "Moi",
     onSaved: () -> Unit = {},
     onNavigateHome: () -> Unit = {},
@@ -42,12 +42,11 @@ fun CreateVideoScreen(
 
     var title by remember { mutableStateOf("") }
     var videoUri by remember { mutableStateOf<Uri?>(null) }
+    var pendingUri by remember { mutableStateOf<Uri?>(null) }
 
     val pickVideoLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent(),
-        onResult = { uri: Uri? ->
-            videoUri = uri
-        }
+        onResult = { uri: Uri? -> pendingUri = uri }
     )
 
     val recordLauncher = rememberLauncherForActivityResult(
@@ -55,7 +54,17 @@ fun CreateVideoScreen(
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             val dataUri: Uri? = result.data?.data
-            videoUri = dataUri
+            pendingUri = dataUri
+        }
+    }
+
+    // When pendingUri changes, clear the existing preview first then set the new uri
+    LaunchedEffect(pendingUri) {
+        val newUri = pendingUri
+        if (newUri != null) {
+            videoUri = null
+            kotlinx.coroutines.delay(120)
+            videoUri = newUri
         }
     }
 
@@ -67,9 +76,6 @@ fun CreateVideoScreen(
         }
     }
 
-    LaunchedEffect(Unit) {
-        viewModel.setCurrentUser(currentUsername)
-    }
     Scaffold(
         bottomBar = {
             BottomBar(
@@ -79,79 +85,52 @@ fun CreateVideoScreen(
             )
         },
         modifier = Modifier.fillMaxSize()
-    ) {
-        Column(
+    ) { innerPadding ->
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(innerPadding)
         ) {
             if (videoUri != null) {
-                // Utiliser VideoPlayer composable existant pour preview
-                VideoPlayer(
+                CreatedVideoPreviewPlayer(
                     videoUrl = videoUri.toString(),
                     isPlaying = true,
-                    modifier = Modifier.height(300.dp).fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black)
                 )
             } else {
+                // placeholder full-screen area
                 Box(
                     modifier = Modifier
-                        .height(300.dp)
-                        .fillMaxWidth(),
+                        .fillMaxSize()
+                        .background(Color.Black),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = "Aucune vidéo sélectionnée")
+                    Text(text = "Aucune vidéo sélectionnée", color = Color.White)
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            OutlinedTextField(
-                value = title,
-                onValueChange = { title = it },
-                label = { Text("Titre") },
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Removed user text field. Use currentUsername parameter instead.
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Button(onClick = { pickVideoLauncher.launch("video/*") }) {
-                    Text("Choisir une vidéo")
+            // Overlay controls: appear on top of the video, pinned to the top
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight()
+                    .align(Alignment.TopCenter),
+                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.6f)
+            ) {
+                Column(modifier = Modifier.padding(12.dp)) {
+                    CreateVideoControls(
+                        title = title,
+                        onTitleChange = { title = it },
+                        onPickClick = { pendingUri = null; pickVideoLauncher.launch("video/*") },
+                        onRecordClick = { pendingUri = null; recordLauncher.launch(Intent(MediaStore.ACTION_VIDEO_CAPTURE)) },
+                        onSaveClick = { viewModel.saveVideo(videoUri, title, currentUsername) },
+                        isSaving = isSaving,
+                        error = error,
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 }
-
-                Button(onClick = {
-                    // Lancer l'app caméra système pour enregistrer une vidéo
-                    val intent = Intent(MediaStore.ACTION_VIDEO_CAPTURE)
-                    recordLauncher.launch(intent)
-                }) {
-                    Text("Enregistrer (caméra)")
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            if (isSaving) {
-                CircularProgressIndicator()
-            } else {
-                Button(
-                    onClick = {
-                        viewModel.saveVideo(videoUri, title, currentUsername)
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("Sauvegarder")
-                }
-            }
-
-            error?.let { err ->
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(text = err)
             }
         }
     }

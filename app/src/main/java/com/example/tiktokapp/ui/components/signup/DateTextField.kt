@@ -51,12 +51,9 @@ package com.example.tiktokapp.ui.components.signup
                      val prevText = textFieldValue.text
                      val formatted = formatBirthDate(incoming.text, prevText)
 
-                     // Compter le nombre de chiffres avant la position de sélection entrante
                      val digitCursorPos = incoming.text
                          .substring(0, incoming.selection.start.coerceAtLeast(0).coerceAtMost(incoming.text.length))
                          .count { it.isDigit() }
-
-                     // Calculer la position du curseur dans le texte formaté
                      fun digitIndexToFormattedPos(digitIndex: Int): Int {
                          return when {
                              digitIndex <= 0 -> 0
