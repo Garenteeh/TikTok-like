@@ -90,7 +90,9 @@ fun NavGraph(
                         popUpTo(Destinations.HOME) { inclusive = true }
                     }
                 },
-                onNavigateHome = { navController.navigate(Destinations.CREATE_VIDEO) },
+                onNavigateHome = { navController.navigate(Destinations.HOME) {
+                    popUpTo(Destinations.CREATE_VIDEO) { inclusive = true }
+                } },
                 onNavigateToProfile = {navController.navigate(Destinations.PROFILE)},
                 onNavigateToMessages = {navController.navigate(Destinations.CONVERSATIONS)}
             )
