@@ -30,13 +30,14 @@ fun ProfileScreen(
     user: User?,
     onLogout: () -> Unit,
     onHome: () -> Unit = {},
-    onAdd: () -> Unit = {}
+    onAdd: () -> Unit = {},
+    onMessages: () -> Unit = {}
 ) {
     val context = LocalContext.current
 
     Scaffold(
         bottomBar = {
-            BottomBar(onHome = { onHome() }, onAdd = { onAdd() }, onProfile = { /* current */ })
+            BottomBar(onHome = { onHome() }, onAdd = { onAdd() }, onProfile = { /* current */ }, onMessages = { onMessages() })
         }
     ) { paddingValues ->
         Box(

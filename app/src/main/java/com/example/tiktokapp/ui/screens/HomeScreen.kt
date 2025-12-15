@@ -32,6 +32,7 @@ import com.example.tiktokapp.viewModels.VideoListViewModel
 fun HomeScreen(
     onNavigateToAddVideo: () -> Unit = {},
     onNavigateToProfile: () -> Unit = {},
+    onNavigateToMessages: () -> Unit = {},
     modifier: Modifier = Modifier,
     viewModel: VideoListViewModel = viewModel(),
     currentUsername: String = "Moi"
@@ -63,7 +64,7 @@ fun HomeScreen(
             .background(Color.Transparent),
         containerColor = Color.Transparent,
         bottomBar = {
-            BottomBar(onHome = {}, onAdd = onNavigateToAddVideo, onProfile = onNavigateToProfile)
+            BottomBar(onHome = {}, onAdd = onNavigateToAddVideo, onProfile = onNavigateToProfile, onMessages = onNavigateToMessages)
         }
 
     ) { paddingValues ->

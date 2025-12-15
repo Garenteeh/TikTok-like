@@ -8,10 +8,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.Icon
@@ -30,9 +30,9 @@ import com.example.tiktokapp.ui.theme.TikTokAppTheme
 fun BottomBar(
     onHome: () -> Unit,
     onAdd: () -> Unit,
-    onProfile: () -> Unit
+    onProfile: () -> Unit,
+    onMessages: () -> Unit = {}
 ) {
-    //Surface() {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -58,21 +58,22 @@ fun BottomBar(
                 )
             }
 
-            Box(
-                modifier = Modifier
-                    .size(56.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primary),
-                contentAlignment = Alignment.Center
-            ) {
-                IconButton(onClick = { onAdd() }) {
-                    Icon(
-                        Icons.Outlined.Add,
-                        tint = MaterialTheme.colorScheme.onPrimary,
-                        modifier = Modifier.size(30.dp),
-                        contentDescription = "Add Button"
-                    )
-                }
+            IconButton(onClick = { onMessages() }) {
+                Icon(
+                    Icons.Outlined.Email,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(35.dp),
+                    contentDescription = "Messages Button"
+                )
+            }
+
+            IconButton(onClick = { onAdd() }) {
+                Icon(
+                    Icons.Outlined.Add,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(35.dp),
+                    contentDescription = "Add Button"
+                )
             }
 
             IconButton(onClick = onProfile) {
@@ -85,7 +86,6 @@ fun BottomBar(
             }
         }
     }
-    //}
 }
 
 
@@ -93,6 +93,6 @@ fun BottomBar(
 @Composable
 fun BottomBarPreview() {
     TikTokAppTheme() {
-        BottomBar(onHome = {}, onAdd = {}, onProfile = {})
+        BottomBar(onHome = {}, onAdd = {}, onProfile = {}, onMessages = {})
     }
 }

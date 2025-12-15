@@ -32,7 +32,8 @@ fun CreateVideoScreen(
     currentUsername: String = "Moi",
     onSaved: () -> Unit = {},
     onNavigateHome: () -> Unit = {},
-    onNavigateToProfile: () -> Unit = {}
+    onNavigateToProfile: () -> Unit = {},
+    onNavigateToMessages: () -> Unit = {}
 ) {
     val context = LocalContext.current
 
@@ -81,7 +82,8 @@ fun CreateVideoScreen(
             BottomBar(
                 onHome = onNavigateHome,
                 onProfile = onNavigateToProfile,
-                onAdd = {/* current */}
+                onAdd = {/* current */},
+                onMessages = onNavigateToMessages
             )
         },
         modifier = Modifier.fillMaxSize()
