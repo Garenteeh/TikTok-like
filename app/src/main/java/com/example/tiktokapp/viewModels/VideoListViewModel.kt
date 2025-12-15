@@ -207,7 +207,7 @@ class VideoListViewModel(
         }
     }
 
-    fun addComment(videoId: String, message: String, username: String = "Moi") {
+    fun addComment(videoId: String, message: String, username: String) {
         Log.d("VideoListViewModel", "addComment called: videoId=$videoId, message=$message")
 
         viewModelScope.launch {
@@ -235,7 +235,7 @@ class VideoListViewModel(
         }
     }
 
-    fun addReplyToComment(videoId: String, commentId: String, message: String, username: String = "Moi") {
+    fun addReplyToComment(videoId: String, commentId: String, message: String, username: String) {
         Log.d("VideoListViewModel", "addReplyToComment called: commentId=$commentId, message=$message")
 
         viewModelScope.launch {
@@ -277,7 +277,7 @@ class VideoListViewModel(
         }
     }
 
-    fun deleteComment(videoId: String, commentId: String, currentUsername: String = "Moi") {
+    fun deleteComment(videoId: String, commentId: String, currentUsername: String) {
         Log.d("VideoListViewModel", "deleteComment called: videoId=$videoId, commentId=$commentId")
 
         viewModelScope.launch {

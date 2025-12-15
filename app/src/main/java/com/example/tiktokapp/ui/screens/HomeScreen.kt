@@ -125,7 +125,7 @@ fun HomeScreen(
                     viewModel.addReplyToComment(video.id, commentId, message, currentUsername)
                 },
                 onDeleteComment = { commentId ->
-                    viewModel.deleteComment(video.id, commentId)
+                    viewModel.deleteComment(video.id, commentId, currentUsername)
                 },
                 currentUsername = currentUsername,
                 videoOwner = video.user
