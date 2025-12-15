@@ -3,14 +3,15 @@ package com.example.tiktokapp.data.remote
 import android.util.Log
 import com.example.tiktokapp.domain.models.dto.VideoDto
 import com.example.tiktokapp.network.RetrofitClient
+import retrofit2.HttpException
+import java.io.IOException
 
 class VideoRemoteDataSource {
 
     suspend fun fetchVideos(count: Int): List<VideoDto> {
         return try {
-            Log.d("VideoRemoteDataSource", "Fetching videos from API...")
+            Log.d("VideoRemoteDataSource", "Fetching $count videos from API...")
             val videos = RetrofitClient.api.getVideos(count)
-            Log.d("VideoRemoteDataSource", "Successfully fetched ${videos.size} videos")
 
             videos.map { video ->
                 VideoDto(
@@ -24,8 +25,14 @@ class VideoRemoteDataSource {
                     comments = video.comments
                 )
             }
+        } catch (e: HttpException) {
+            Log.e("VideoRemoteDataSource", "HTTP error: ${e.code()} - ${e.message()}", e)
+            emptyList()
+        } catch (e: IOException) {
+            Log.e("VideoRemoteDataSource", "Network error: ${e.message}", e)
+            emptyList()
         } catch (e: Exception) {
-            Log.e("VideoRemoteDataSource", "Error fetching videos", e)
+            Log.e("VideoRemoteDataSource", "Unknown error: ${e.javaClass.simpleName} - ${e.message}", e)
             emptyList()
         }
     }
