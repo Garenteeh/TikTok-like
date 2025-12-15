@@ -1,22 +1,18 @@
 package com.example.tiktokapp.ui.screens
 
 import android.util.Log
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.pager.VerticalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
@@ -31,6 +27,7 @@ import com.example.tiktokapp.ui.components.VideoActionButton
 import com.example.tiktokapp.ui.components.VideoCard
 import com.example.tiktokapp.viewModels.VideoListViewModel
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HomeScreen(
     onNavigateToAddVideo: () -> Unit = {},
@@ -50,22 +47,15 @@ fun HomeScreen(
 
     val screenHeight = LocalConfiguration.current.screenHeightDp.dp
 
-    val state = rememberLazyListState()
-    val fling = rememberSnapFlingBehavior(state)
+    // VerticalPager pour le scroll type TikTok
+    val pagerState = rememberPagerState(pageCount = { videos.size })
 
-    val centered by remember {
-        derivedStateOf {
-            val info = state.layoutInfo
-            val items = info.visibleItemsInfo
-            if (items.isEmpty()) 0 else {
-                val center = (info.viewportStartOffset + info.viewportEndOffset) / 2
-                items.minByOrNull { kotlin.math.abs((it.offset + it.size / 2) - center) }
-                    ?.index ?: 0
-            }
+    // Charger plus de vidéos quand on approche de la fin
+    LaunchedEffect(pagerState.currentPage) {
+        if (pagerState.currentPage >= videos.size - 3 && !isLoading) {
+            viewModel.loadMoreVideos()
         }
     }
-
-    val scrolling by remember { derivedStateOf { state.isScrollInProgress } }
 
     Scaffold(
         modifier = modifier
@@ -80,51 +70,41 @@ fun HomeScreen(
         // Calculer la hauteur disponible pour les vidéos (hauteur écran - bottom bar)
         val videoHeight = screenHeight - paddingValues.calculateBottomPadding()
 
-        LazyColumn(
-            state = state,
-            flingBehavior = fling,
-            verticalArrangement = Arrangement.spacedBy(0.dp),
+        VerticalPager(
+            state = pagerState,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-        ) {
-            itemsIndexed(videos) { index, video ->
-                VideoCard(
-                    video = video,
-                    isPlaying = index == centered && !scrolling,
-                    modifier = Modifier.height(videoHeight)
-                ) {
-                    VideoActionButton(
-                        icon = Icons.Default.Favorite,
-                        text = video.formatCount(video.likes),
-                        isActive = video.isLiked,
-                        activeColor = Color.Red,
-                        onClick = { viewModel.toggleLike(video.id) }
-                    )
-                    VideoActionButton(
-                        icon = Icons.Default.Email,
-                        text = video.formatCount(video.totalCommentsCount()),
-                        onClick = { selectedVideoId = video.id }
-                    )
-                    VideoActionButton(
-                        icon = Icons.Default.Share,
-                        onClick = {}
-                    )
-                    VideoActionButton(
-                        icon = Icons.Default.Refresh,
-                        onClick = {}
-                    )
-                }
+        ) { page ->
+            val video = videos[page]
+            val isCurrentPage = pagerState.currentPage == page
+            val isSettled = pagerState.isScrollInProgress.not()
 
-                if (index >= videos.lastIndex - 2 && !isLoading) {
-                    viewModel.loadMoreVideos()
-                }
-            }
-
-            if (isLoading) {
-                item {
-                    CircularProgressIndicator(Modifier.padding(16.dp))
-                }
+            VideoCard(
+                video = video,
+                isPlaying = isCurrentPage && isSettled,
+                modifier = Modifier.height(videoHeight)
+            ) {
+                VideoActionButton(
+                    icon = Icons.Default.Favorite,
+                    text = video.formatCount(video.likes),
+                    isActive = video.isLiked,
+                    activeColor = Color.Red,
+                    onClick = { viewModel.toggleLike(video.id) }
+                )
+                VideoActionButton(
+                    icon = Icons.Default.Email,
+                    text = video.formatCount(video.totalCommentsCount()),
+                    onClick = { selectedVideoId = video.id }
+                )
+                VideoActionButton(
+                    icon = Icons.Default.Share,
+                    onClick = {}
+                )
+                VideoActionButton(
+                    icon = Icons.Default.Refresh,
+                    onClick = {}
+                )
             }
         }
     }
