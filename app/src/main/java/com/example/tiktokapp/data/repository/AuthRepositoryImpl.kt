@@ -39,22 +39,21 @@ class AuthRepositoryImpl(
         }
     }
 
-    override suspend fun register(name: String, username: String, email: String, password: String): Result<User> {
+    override suspend fun register(user: User): Result<User> {
         return try {
-            if (userDao.isEmailTaken(email)) {
+            if (userDao.isEmailTaken(user.email)) {
                 return Result.failure(EmailAlreadyTakenException())
             }
 
-            val parts = name.trim().split(" ", limit = 2)
-            val firstName = parts.getOrNull(0) ?: ""
-            val lastName = parts.getOrNull(1) ?: ""
+            val firstName = user.firstName
+            val lastName = user.lastName
 
-            var finalUsername = username.trim()
+            var finalUsername = user.username.trim()
             if (finalUsername.isBlank()) {
                 var baseUsername = if (firstName.isNotBlank()) {
                     (firstName + lastName).lowercase(Locale.getDefault()).replace("\\s+".toRegex(), "")
                 } else {
-                    email.substringBefore("@").lowercase(Locale.getDefault())
+                    user.email.substringBefore("@").lowercase(Locale.getDefault())
                 }
                 if (baseUsername.isBlank()) baseUsername = "user"
                 finalUsername = baseUsername
@@ -69,17 +68,18 @@ class AuthRepositoryImpl(
             if (userDao.isUsernameTaken(finalUsername)) {
                 return Result.failure(UsernameAlreadyTakenException())
             }
+
             val salt = UserUtils.generateSalt()
-            val hashedPassword = UserUtils.hashPasswordWithSalt(password, salt)
+            val hashedPassword = UserUtils.hashPasswordWithSalt(user.password, salt)
 
             val userToSave = User(
                 firstName = firstName,
                 lastName = lastName,
-                birthDate = "",
-                email = email,
+                birthDate = user.birthDate,
+                email = user.email,
                 password = hashedPassword,
-                phoneNumber = "",
-                country = "",
+                phoneNumber = user.phoneNumber,
+                country = user.country,
                 username = finalUsername,
                 salt = salt
             )
@@ -87,7 +87,7 @@ class AuthRepositoryImpl(
             val entity = userToSave.toEntity()
             userDao.insertUser(entity)
 
-            val saved = userDao.getUserByEmail(email) ?: return Result.failure(Exception("Erreur lors de la création de l'utilisateur"))
+            val saved = userDao.getUserByEmail(user.email) ?: return Result.failure(Exception("Erreur lors de la création de l'utilisateur"))
 
             val token = AuthToken(
                 accessToken = "fake_access_${saved.username}_${System.currentTimeMillis()}",
