@@ -1,5 +1,6 @@
 package com.example.tiktokapp.ui.screens
 
+import android.content.Intent
 import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -19,6 +20,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.tiktokapp.ui.components.CommentsBottomSheet
@@ -47,6 +49,7 @@ fun HomeScreen(
     }
 
     val screenHeight = LocalConfiguration.current.screenHeightDp.dp
+    val context = LocalContext.current
 
     // VerticalPager pour le scroll type TikTok
     val pagerState = rememberPagerState(pageCount = { videos.size })
@@ -100,7 +103,14 @@ fun HomeScreen(
                 )
                 VideoActionButton(
                     icon = Icons.Default.Share,
-                    onClick = {}
+                    onClick = {
+                        val sendIntent = Intent().apply {
+                            action = Intent.ACTION_SEND
+                            putExtra(Intent.EXTRA_TEXT, "Check out this video: ${video.url}")
+                            type = "text/plain"
+                        }
+                        context.startActivity(Intent.createChooser(sendIntent, null))
+                    }
                 )
                 VideoActionButton(
                     icon = Icons.Default.Refresh,
