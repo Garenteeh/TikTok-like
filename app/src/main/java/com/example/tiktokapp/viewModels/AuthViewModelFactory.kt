@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.tiktokapp.domain.usecases.LoginUseCase
 import com.example.tiktokapp.domain.usecases.RegisterUseCase
 
+
 class AuthViewModelFactory(
     private val application: Application,
     private val loginUseCase: LoginUseCase,
@@ -13,11 +14,9 @@ class AuthViewModelFactory(
 ) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return when {
-            modelClass.isAssignableFrom(LoginViewModel::class.java) -> LoginViewModel(application, loginUseCase) as T
-            modelClass.isAssignableFrom(RegisterViewModel::class.java) -> RegisterViewModel(application, registerUseCase) as T
-            else -> throw IllegalArgumentException("Unknown ViewModel class")
+        if (modelClass.isAssignableFrom(UserViewModel::class.java)) {
+            return UserViewModel(application, loginUseCase, registerUseCase) as T
         }
+        throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
     }
 }
-
