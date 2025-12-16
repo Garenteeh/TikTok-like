@@ -99,6 +99,7 @@ fun SignupScreen(
             .verticalScroll(scrollState),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
+        Spacer(modifier = Modifier.height(32.dp))
         Text("Inscription", style = MaterialTheme.typography.headlineMedium)
 
         // First Name
@@ -281,5 +282,6 @@ fun SignupScreen(
                 Text("Déjà un compte ? Se connecter")
             }
         }
+        Spacer(modifier = Modifier.height(32.dp))
     }
 }

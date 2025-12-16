@@ -12,6 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -76,6 +77,7 @@ fun LoginScreen(
         Column(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            Text("Connexion", style = MaterialTheme.typography.headlineMedium)
             BaseTextField(
                 value = identifier,
                 onValueChange = {
