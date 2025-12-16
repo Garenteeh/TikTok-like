@@ -11,9 +11,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -22,22 +21,30 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.tiktokapp.ui.components.BottomBar
 import com.example.tiktokapp.domain.models.User
+import com.example.tiktokapp.domain.models.flagEmoji
+import com.example.tiktokapp.repositories.CountryRepository
+import com.example.tiktokapp.ui.components.BottomBar
+import com.example.tiktokapp.viewModels.UserViewModel
 
 @Composable
 fun ProfileScreen(
-    user: User?,
-    onLogout: () -> Unit,
+    userViewModel: UserViewModel,
     onHome: () -> Unit = {},
     onAdd: () -> Unit = {},
-    onMessages: () -> Unit = {}
+    onMessages: () -> Unit = {},
+    onLogout: () -> Unit = {}
 ) {
     val context = LocalContext.current
+    val currentUser by userViewModel.currentUser.collectAsState(initial = null)
+    val flagEmoji = currentUser?.country?.let { countryName ->
+        CountryRepository.countries.firstOrNull { it.name == countryName }?.flagEmoji()
+    } ?: ""
 
     Scaffold(
         bottomBar = {
-            BottomBar(onHome = { onHome() }, onAdd = { onAdd() }, onProfile = { /* current */ }, onMessages = { onMessages() })
+            BottomBar(onHome = { onHome() }, onAdd = { onAdd() }, onProfile = { /* current */ },
+                onMessages = onMessages)
         }
     ) { paddingValues ->
         Box(
@@ -74,7 +81,7 @@ fun ProfileScreen(
 
                 // Nom d'utilisateur
                 Text(
-                    text = "@${user?.username ?: ""}",
+                    text = "@${currentUser?.username ?: ""}",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -83,7 +90,7 @@ fun ProfileScreen(
 
                 // Nom complet
                 Text(
-                    text = "${user?.firstName ?: ""} ${user?.lastName ?: ""}",
+                    text = "${currentUser?.firstName ?: ""} ${currentUser?.lastName ?: ""}",
                     fontSize = 18.sp,
                     color = Color.Gray
                 )
@@ -109,13 +116,21 @@ fun ProfileScreen(
                             modifier = Modifier.padding(bottom = 16.dp)
                         )
 
-                        ProfileInfoItem(label = "Email", value = user?.email ?: "")
+                        ProfileInfoItem(label = "Email", value = currentUser?.email ?: "")
                         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-                        ProfileInfoItem(label = "Téléphone", value = user?.phoneNumber ?: "")
+                        ProfileInfoItem(
+                            label = "Téléphone",
+                            value = formatPhoneNumber(currentUser?.phoneNumber ?: "")
+                        )
                         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-                        ProfileInfoItem(label = "Date de naissance", value = user?.birthDate ?: "")
+                        ProfileInfoItem(label = "Date de naissance", value = currentUser?.birthDate ?: "")
                         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-                        ProfileInfoItem(label = "Pays", value = user?.country ?: "")
+                        ProfileInfoItem(
+                            label = "Pays",
+                            value = if (flagEmoji.isNotBlank()) "${flagEmoji} ${currentUser?.country ?: ""}" else (currentUser?.country ?: "")
+                        )
+
+                        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
                     }
                 }
 
@@ -124,8 +139,9 @@ fun ProfileScreen(
                 // Bouton de déconnexion
                 Button(
                     onClick = {
-                        onLogout()
+                        userViewModel.logout()
                         Toast.makeText(context, "Déconnecté", Toast.LENGTH_SHORT).show()
+                        onLogout()
                     },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -142,6 +158,16 @@ fun ProfileScreen(
             }
         }
     }
+}
+
+
+fun formatPhoneNumber(raw: String): String {
+    if (raw.isBlank()) return ""
+    // Ne garder que les chiffres
+    val digits = raw.filter { it.isDigit() }
+    if (digits.isEmpty()) return raw
+    // Grouper par 2 caractères et joindre par un espace
+    return digits.chunked(2).joinToString(" ")
 }
 
 @Composable

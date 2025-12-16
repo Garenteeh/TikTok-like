@@ -29,12 +29,12 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.example.tiktokapp.ui.components.signup.BaseTextField
 import com.example.tiktokapp.ui.components.signup.PasswordTextField
-import com.example.tiktokapp.viewModels.LoginViewModel
+import com.example.tiktokapp.viewModels.UserViewModel
 import com.example.tiktokapp.viewModels.RegistrationState
 
 @Composable
 fun LoginScreen(
-    loginViewModel: LoginViewModel,
+    userViewModel: UserViewModel,
     onNavigateToSignup: () -> Unit,
     onLoginSucess: () -> Unit
 ) {
@@ -44,7 +44,7 @@ fun LoginScreen(
     val errors = remember { mutableStateMapOf<String, String>() }
 
     val context = LocalContext.current
-    val registrationState by loginViewModel.registrationState.collectAsState()
+    val registrationState by userViewModel.registrationState.collectAsState()
 
     LaunchedEffect(registrationState) {
         when (registrationState) {
@@ -55,13 +55,13 @@ fun LoginScreen(
             is RegistrationState.Success -> {
                 Toast.makeText(context, "Connexion réussie", Toast.LENGTH_SHORT).show()
                 errors.clear()
-                loginViewModel.resetState()
+                userViewModel.resetState()
                 onLoginSucess()
             }
             is RegistrationState.Error -> {
                 val message = (registrationState as RegistrationState.Error).message
                 Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-                loginViewModel.resetState()
+                userViewModel.resetState()
             }
             else -> {}
         }
@@ -109,7 +109,7 @@ fun LoginScreen(
             )
 
             Button(
-                onClick = { loginViewModel.loginUser(identifier, password) },
+                onClick = { userViewModel.loginUser(identifier, password) },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Se connecter")
