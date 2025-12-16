@@ -3,41 +3,39 @@ package com.example.tiktokapp.ui.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.tiktokapp.ui.screens.HomeScreen
-import com.example.tiktokapp.ui.screens.SignupScreen
-import com.example.tiktokapp.ui.screens.LoginScreen
-import com.example.tiktokapp.ui.screens.ProfileScreen
-import com.example.tiktokapp.ui.screens.ConversationsScreen
 import com.example.tiktokapp.ui.screens.ChatScreen
-import com.example.tiktokapp.ui.screens.NewConversationScreen
-import com.example.tiktokapp.viewModels.LoginViewModel
-import com.example.tiktokapp.viewModels.MessagingViewModel
-import com.example.tiktokapp.viewModels.RegisterViewModel
-import com.example.tiktokapp.viewModels.VideoListViewModel
+import com.example.tiktokapp.ui.screens.ConversationsScreen
 import com.example.tiktokapp.ui.screens.CreateVideoScreen
-import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.tiktokapp.ui.screens.HomeScreen
+import com.example.tiktokapp.ui.screens.LoginScreen
+import com.example.tiktokapp.ui.screens.NewConversationScreen
+import com.example.tiktokapp.ui.screens.ProfileScreen
+import com.example.tiktokapp.ui.screens.SignupScreen
+import com.example.tiktokapp.viewModels.MessagingViewModel
+import com.example.tiktokapp.viewModels.UserViewModel
+import com.example.tiktokapp.viewModels.VideoListViewModel
 
 @Composable
 fun NavGraph(
-    loginViewModel: LoginViewModel,
-    registerViewModel: RegisterViewModel,
+    userViewModel: UserViewModel,
     videoViewModel: VideoListViewModel,
 ) {
     val navController = rememberNavController()
 
-    val currentUser by loginViewModel.currentUser.collectAsState()
+    val currentUser by userViewModel.currentUser.collectAsState()
 
     val startDestination = if (currentUser != null) Destinations.HOME else Destinations.LOGIN
 
     NavHost(navController = navController, startDestination = startDestination) {
         composable(Destinations.SIGNUP) {
             SignupScreen(
-                registerViewModel = registerViewModel,
+                userViewModel = userViewModel,
                 onNavigateToLogin = { navController.navigate(Destinations.LOGIN) {
                     popUpTo(Destinations.SIGNUP) { inclusive = true }
                 } },
@@ -48,7 +46,7 @@ fun NavGraph(
         }
         composable(Destinations.LOGIN) {
             LoginScreen(
-                loginViewModel = loginViewModel,
+                userViewModel = userViewModel,
                 onLoginSucess = { navController.navigate(Destinations.HOME) {
                     popUpTo(Destinations.LOGIN) { inclusive = true }
                 } },
@@ -66,18 +64,13 @@ fun NavGraph(
         }
         composable(Destinations.PROFILE) {
             ProfileScreen(
-                user = currentUser,
-                onLogout = {
-                    loginViewModel.logout()
-                    navController.navigate(Destinations.LOGIN) {
-                        popUpTo(Destinations.HOME) { inclusive = true }
-                    }
-                },
+                userViewModel = userViewModel,
                 onHome = { navController.navigate(Destinations.HOME) {
                     popUpTo(Destinations.PROFILE) { inclusive = true }
                 } },
                 onAdd = { navController.navigate(Destinations.CREATE_VIDEO) },
-                onMessages = { navController.navigate(Destinations.CONVERSATIONS) }
+                onMessages = { navController.navigate(Destinations.CONVERSATIONS) },
+                onLogout = { navController.navigate(Destinations.LOGIN) }
             )
         }
 
@@ -90,9 +83,7 @@ fun NavGraph(
                         popUpTo(Destinations.HOME) { inclusive = true }
                     }
                 },
-                onNavigateHome = { navController.navigate(Destinations.HOME) {
-                    popUpTo(Destinations.CREATE_VIDEO) { inclusive = true }
-                } },
+                onNavigateHome = { navController.navigate(Destinations.CREATE_VIDEO) },
                 onNavigateToProfile = {navController.navigate(Destinations.PROFILE)},
                 onNavigateToMessages = {navController.navigate(Destinations.CONVERSATIONS)}
             )

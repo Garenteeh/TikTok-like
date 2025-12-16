@@ -21,8 +21,7 @@ import com.example.tiktokapp.domain.usecases.RegisterUseCase
 import com.example.tiktokapp.ui.navigation.NavGraph
 import com.example.tiktokapp.ui.theme.TikTokAppTheme
 import com.example.tiktokapp.viewModels.AuthViewModelFactory
-import com.example.tiktokapp.viewModels.LoginViewModel
-import com.example.tiktokapp.viewModels.RegisterViewModel
+import com.example.tiktokapp.viewModels.UserViewModel
 import com.example.tiktokapp.viewModels.VideoListViewModel
 
 class MainActivity : ComponentActivity() {
@@ -49,10 +48,9 @@ class MainActivity : ComponentActivity() {
                     val registerUseCase = RegisterUseCase(authRepo)
                     val factory = AuthViewModelFactory(application, loginUseCase, registerUseCase)
                     val provider = ViewModelProvider(this, factory)
-                    val loginViewModel = provider[LoginViewModel::class.java]
-                    val registerViewModel = provider[RegisterViewModel::class.java]
+                    val userViewModel = provider[UserViewModel::class.java]
 
-                    NavGraph(loginViewModel, registerViewModel, videoViewModel)
+                    NavGraph(userViewModel, videoViewModel)
                 }
             }
         }
