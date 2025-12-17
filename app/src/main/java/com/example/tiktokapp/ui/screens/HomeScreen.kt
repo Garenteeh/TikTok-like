@@ -76,11 +76,10 @@ fun HomeScreen(
         ) { page ->
             val video = videos[page]
             val isCurrentPage = pagerState.currentPage == page
-            val isSettled = pagerState.isScrollInProgress.not()
 
             VideoCard(
                 video = video,
-                isPlaying = isCurrentPage && isSettled,
+                isPlaying = isCurrentPage,
                 modifier = Modifier.height(videoHeight)
             ) {
                 VideoActionButton(

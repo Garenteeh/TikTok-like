@@ -38,7 +38,7 @@ fun VideoPlayer(
             .build()
             .apply {
                 repeatMode = Player.REPEAT_MODE_ALL
-                playWhenReady = false
+                playWhenReady = true
                 addListener(object : Player.Listener {
                     override fun onPlayerError(error: PlaybackException) {
                         Log.e("VideoPlayer", "URL en erreur: $videoUrl")
@@ -46,35 +46,27 @@ fun VideoPlayer(
                 })
 
                 setMediaItem(MediaItem.fromUri(videoUrl))
+                prepare()
             }
     }
 
-    var tappedPlayState by remember { mutableStateOf(isPlaying) }
+    var tappedPlayState by remember { mutableStateOf(true) }
 
     LaunchedEffect(isPlaying) {
         if (isPlaying) {
-            if (exoPlayer.playbackState == Player.STATE_IDLE) {
-                exoPlayer.prepare()
-            }
             tappedPlayState = true
             exoPlayer.play()
         } else {
             tappedPlayState = false
             exoPlayer.pause()
-            kotlinx.coroutines.delay(500)
-            if (!isPlaying) {
-                exoPlayer.stop()
-            }
         }
     }
 
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
-                Lifecycle.Event.ON_PAUSE,
-                Lifecycle.Event.ON_STOP -> {
+                Lifecycle.Event.ON_PAUSE -> {
                     exoPlayer.pause()
-                    exoPlayer.stop()
                 }
                 Lifecycle.Event.ON_DESTROY -> {
                     exoPlayer.release()
@@ -85,8 +77,6 @@ fun VideoPlayer(
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose {
             lifecycleOwner.lifecycle.removeObserver(observer)
-            exoPlayer.stop()
-            exoPlayer.clearMediaItems()
             exoPlayer.release()
         }
     }
