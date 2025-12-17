@@ -14,15 +14,21 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.tiktokapp.ui.components.CommentsBottomSheet
 import com.example.tiktokapp.ui.components.BottomBar
+import com.example.tiktokapp.ui.components.CommentsBottomSheet
 import com.example.tiktokapp.ui.components.VideoActionButton
 import com.example.tiktokapp.ui.components.VideoCard
 import com.example.tiktokapp.viewModels.VideoListViewModel
@@ -33,6 +39,7 @@ fun HomeScreen(
     onNavigateToAddVideo: () -> Unit = {},
     onNavigateToProfile: () -> Unit = {},
     onNavigateToMessages: () -> Unit = {},
+    onShareVideo: (String) -> Unit = {},
     modifier: Modifier = Modifier,
     viewModel: VideoListViewModel = viewModel(),
     currentUsername: String = "Moi"
@@ -47,6 +54,7 @@ fun HomeScreen(
     }
 
     val screenHeight = LocalConfiguration.current.screenHeightDp.dp
+    val context = LocalContext.current
 
     val pagerState = rememberPagerState(pageCount = { videos.size })
 
@@ -62,7 +70,12 @@ fun HomeScreen(
             .background(Color.Transparent),
         containerColor = Color.Transparent,
         bottomBar = {
-            BottomBar(onHome = {}, onAdd = onNavigateToAddVideo, onProfile = onNavigateToProfile, onMessages = onNavigateToMessages)
+            BottomBar(
+                onHome = {},
+                onAdd = onNavigateToAddVideo,
+                onProfile = onNavigateToProfile,
+                onMessages = onNavigateToMessages
+            )
         }
 
     ) { paddingValues ->
@@ -96,7 +109,7 @@ fun HomeScreen(
                 )
                 VideoActionButton(
                     icon = Icons.Default.Share,
-                    onClick = {}
+                    onClick = { onShareVideo(video.url) }
                 )
                 VideoActionButton(
                     icon = Icons.Default.Refresh,

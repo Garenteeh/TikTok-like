@@ -44,6 +44,14 @@ class MessagingViewModel(application: Application) : AndroidViewModel(applicatio
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error.asStateFlow()
 
+    // ID du message vidéo actuellement lu (pour s'assurer qu'une seule vidéo joue)
+    private val _currentlyPlayingMessageId = MutableStateFlow<String?>(null)
+    val currentlyPlayingMessageId: StateFlow<String?> = _currentlyPlayingMessageId.asStateFlow()
+
+    fun setCurrentlyPlayingMessageId(messageId: String?) {
+        _currentlyPlayingMessageId.value = messageId
+    }
+
     fun selectConversation(conversationId: String) {
         viewModelScope.launch {
             try {
@@ -120,4 +128,3 @@ class MessagingViewModel(application: Application) : AndroidViewModel(applicatio
         _error.value = null
     }
 }
-
