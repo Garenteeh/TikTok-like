@@ -40,7 +40,8 @@ fun VideoEntity.toDomain(): Video {
         shares = this.shares,
         reposts = this.reposts,
         comments = emptyList(),
-        isLiked = this.isLiked
+        isLiked = this.isLiked,
+        isReposted = this.isReposted
     )
 }
 
@@ -53,7 +54,8 @@ fun Video.toEntity(): VideoEntity {
         likes = this.likes,
         shares = this.shares,
         reposts = this.reposts,
-        isLiked = this.isLiked
+        isLiked = this.isLiked,
+        isReposted = this.isReposted
     )
 }
 

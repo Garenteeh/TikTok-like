@@ -10,7 +10,8 @@ data class Video(
     val shares: Int = 0,
     val reposts: Int = 0,
     val comments: List<Comment>? = emptyList(),
-    val isLiked: Boolean = false
+    val isLiked: Boolean = false,
+    val isReposted: Boolean = false
 ) {
     fun totalCommentsCount(): Int {
         fun count(commentList: List<Comment>?): Int {

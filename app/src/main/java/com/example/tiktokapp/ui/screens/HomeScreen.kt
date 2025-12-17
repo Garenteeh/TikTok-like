@@ -48,12 +48,10 @@ fun HomeScreen(
 
     val screenHeight = LocalConfiguration.current.screenHeightDp.dp
 
-    // VerticalPager pour le scroll type TikTok
     val pagerState = rememberPagerState(pageCount = { videos.size })
 
-    // Charger plus de vidéos quand on approche de la fin
     LaunchedEffect(pagerState.currentPage) {
-        if (pagerState.currentPage >= videos.size - 3 && !isLoading) {
+        if (pagerState.currentPage >= videos.size - 5 && !isLoading && videos.size < 30) {
             viewModel.loadMoreVideos()
         }
     }
@@ -68,7 +66,6 @@ fun HomeScreen(
         }
 
     ) { paddingValues ->
-        // Calculer la hauteur disponible pour les vidéos (hauteur écran - bottom bar)
         val videoHeight = screenHeight - paddingValues.calculateBottomPadding()
 
         VerticalPager(
@@ -104,7 +101,10 @@ fun HomeScreen(
                 )
                 VideoActionButton(
                     icon = Icons.Default.Refresh,
-                    onClick = {}
+                    text = video.formatCount(video.reposts),
+                    isActive = video.isReposted,
+                    activeColor = Color.Green,
+                    onClick = { viewModel.toggleRepost(video.id) }
                 )
             }
         }

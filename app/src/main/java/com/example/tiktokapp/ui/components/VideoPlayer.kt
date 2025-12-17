@@ -1,5 +1,6 @@
 package com.example.tiktokapp.ui.components
 
+import android.util.Log
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -10,6 +11,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.media3.common.MediaItem
+import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.DefaultRenderersFactory
@@ -36,31 +38,55 @@ fun VideoPlayer(
             .build()
             .apply {
                 repeatMode = Player.REPEAT_MODE_ALL
-                playWhenReady = isPlaying
+                playWhenReady = false
+                addListener(object : Player.Listener {
+                    override fun onPlayerError(error: PlaybackException) {
+                        Log.e("VideoPlayer", "URL en erreur: $videoUrl")
+                    }
+                })
+
                 setMediaItem(MediaItem.fromUri(videoUrl))
-                prepare()
             }
     }
 
     var tappedPlayState by remember { mutableStateOf(isPlaying) }
 
     LaunchedEffect(isPlaying) {
-        tappedPlayState = isPlaying
-        if (isPlaying) exoPlayer.play() else exoPlayer.pause()
+        if (isPlaying) {
+            if (exoPlayer.playbackState == Player.STATE_IDLE) {
+                exoPlayer.prepare()
+            }
+            tappedPlayState = true
+            exoPlayer.play()
+        } else {
+            tappedPlayState = false
+            exoPlayer.pause()
+            kotlinx.coroutines.delay(500)
+            if (!isPlaying) {
+                exoPlayer.stop()
+            }
+        }
     }
 
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
                 Lifecycle.Event.ON_PAUSE,
-                Lifecycle.Event.ON_STOP -> exoPlayer.pause()
-                Lifecycle.Event.ON_DESTROY -> exoPlayer.release()
+                Lifecycle.Event.ON_STOP -> {
+                    exoPlayer.pause()
+                    exoPlayer.stop()
+                }
+                Lifecycle.Event.ON_DESTROY -> {
+                    exoPlayer.release()
+                }
                 else -> {}
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose {
             lifecycleOwner.lifecycle.removeObserver(observer)
+            exoPlayer.stop()
+            exoPlayer.clearMediaItems()
             exoPlayer.release()
         }
     }

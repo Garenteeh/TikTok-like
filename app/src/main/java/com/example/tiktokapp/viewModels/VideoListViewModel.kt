@@ -104,8 +104,9 @@ class VideoListViewModel(
             try {
                 val localVideos = videoRepository.getAllVideos()
                 if (localVideos.isNotEmpty()) {
-                    _videos.value = localVideos
-                    Log.d("VideoListViewModel", "Loaded ${localVideos.size} videos from DB")
+                    val limitedVideos = localVideos.take(20)
+                    _videos.value = limitedVideos
+                    Log.d("VideoListViewModel", "Loaded ${limitedVideos.size} videos from DB (limited from ${localVideos.size})")
                 }
             } catch (e: Exception) {
                 Log.e("VideoListViewModel", "Error loading videos from DB", e)
@@ -124,9 +125,13 @@ class VideoListViewModel(
 
         viewModelScope.launch {
             try {
-                val newVideos = videoRepository.fetchRemoteVideos(50)
-                _videos.value = newVideos
-                Log.d("VideoListViewModel", "Loaded ${newVideos.size} new videos")
+                val newVideos = videoRepository.fetchRemoteVideos(10)
+
+                val currentVideos = _videos.value ?: emptyList()
+                val allVideos = (currentVideos + newVideos).distinctBy { it.id }
+                _videos.value = allVideos.take(30)
+
+                Log.d("VideoListViewModel", "Loaded ${newVideos.size} new videos, total: ${_videos.value?.size}")
             } catch (e: Exception) {
                 Log.e("VideoListViewModel", "Error loading videos", e)
             } finally {
@@ -157,6 +162,30 @@ class VideoListViewModel(
                 }
             } catch (e: Exception) {
                 Log.e("VideoListViewModel", "Error toggling like", e)
+            }
+        }
+    }
+
+    fun toggleRepost(videoId: String) {
+        viewModelScope.launch {
+            try {
+                val updatedVideo = videoRepository.toggleRepost(videoId)
+                if (updatedVideo != null) {
+                    _videos.value = _videos.value?.map { video ->
+                        if (video.id == videoId) {
+                            video.copy(
+                                reposts = updatedVideo.reposts,
+                                isReposted = updatedVideo.isReposted,
+                                comments = video.comments
+                            )
+                        } else {
+                            video
+                        }
+                    }
+                    Log.d("VideoListViewModel", "Toggled repost for video $videoId")
+                }
+            } catch (e: Exception) {
+                Log.e("VideoListViewModel", "Error toggling repost", e)
             }
         }
     }

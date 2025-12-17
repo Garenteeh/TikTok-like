@@ -102,7 +102,6 @@ fun SignupScreen(
         Spacer(modifier = Modifier.height(32.dp))
         Text("Inscription", style = MaterialTheme.typography.headlineMedium)
 
-        // First Name
         BaseTextField(
             value = firstName,
             onValueChange = {
@@ -120,7 +119,6 @@ fun SignupScreen(
             }
         )
 
-        // Last Name
         BaseTextField(
             value = lastName,
             onValueChange = {
@@ -138,7 +136,6 @@ fun SignupScreen(
             }
         )
 
-        // Username
         BaseTextField(
             value = username,
             onValueChange = {
@@ -156,7 +153,6 @@ fun SignupScreen(
             }
         )
 
-        // Email
         BaseTextField(
             value = email,
             onValueChange = {
@@ -175,7 +171,6 @@ fun SignupScreen(
 
         )
 
-        // Phone Number
         PhoneTextField(
             value = phoneNumber,
             onValueChange = {
@@ -187,7 +182,6 @@ fun SignupScreen(
             isError =  errors.containsKey("phone"),
         )
 
-        // Password
         PasswordTextField (
             value = password,
             onValueChange = {
@@ -212,7 +206,6 @@ fun SignupScreen(
 
         )
 
-        // Birth Date
         BirthDateTextField (
             value = birthDate,
             onValueChange = {
@@ -224,7 +217,6 @@ fun SignupScreen(
         )
 
 
-        // Country Picker
         CountryPicker(
             selectedCountry = selectedCountry,
             onCountrySelected = {

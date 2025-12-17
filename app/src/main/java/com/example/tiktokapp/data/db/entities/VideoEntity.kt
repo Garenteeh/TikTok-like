@@ -14,6 +14,7 @@ data class VideoEntity(
     val shares: Int = 0,
     val reposts: Int = 0,
     val timestamp: Long = System.currentTimeMillis(),
-    val isLiked: Boolean = false
+    val isLiked: Boolean = false,
+    val isReposted: Boolean = false
 )
 

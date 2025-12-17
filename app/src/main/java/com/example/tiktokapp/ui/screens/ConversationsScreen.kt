@@ -60,7 +60,7 @@ fun ConversationsScreen(
                 onHome = onNavigateToHome,
                 onAdd = onNavigateToAddVideo,
                 onProfile = onNavigateToProfile,
-                onMessages = { /* Already here */ }
+                onMessages = { }
             )
         },
         modifier = modifier.fillMaxSize()
