@@ -9,6 +9,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import android.net.Uri
 import com.example.tiktokapp.ui.screens.ChatScreen
 import com.example.tiktokapp.ui.screens.ConversationsScreen
 import com.example.tiktokapp.ui.screens.CreateVideoScreen
@@ -16,6 +17,7 @@ import com.example.tiktokapp.ui.screens.HomeScreen
 import com.example.tiktokapp.ui.screens.LoginScreen
 import com.example.tiktokapp.ui.screens.NewConversationScreen
 import com.example.tiktokapp.ui.screens.ProfileScreen
+import com.example.tiktokapp.ui.screens.ShareScreen
 import com.example.tiktokapp.ui.screens.SignupScreen
 import com.example.tiktokapp.viewModels.MessagingViewModel
 import com.example.tiktokapp.viewModels.UserViewModel
@@ -36,20 +38,26 @@ fun NavGraph(
         composable(Destinations.SIGNUP) {
             SignupScreen(
                 userViewModel = userViewModel,
-                onNavigateToLogin = { navController.navigate(Destinations.LOGIN) {
-                    popUpTo(Destinations.SIGNUP) { inclusive = true }
-                } },
-                onSignupSucess = { navController.navigate(Destinations.HOME) {
-                    popUpTo(Destinations.SIGNUP) { inclusive = true }
-                } }
+                onNavigateToLogin = {
+                    navController.navigate(Destinations.LOGIN) {
+                        popUpTo(Destinations.SIGNUP) { inclusive = true }
+                    }
+                },
+                onSignupSucess = {
+                    navController.navigate(Destinations.HOME) {
+                        popUpTo(Destinations.SIGNUP) { inclusive = true }
+                    }
+                }
             )
         }
         composable(Destinations.LOGIN) {
             LoginScreen(
                 userViewModel = userViewModel,
-                onLoginSucess = { navController.navigate(Destinations.HOME) {
-                    popUpTo(Destinations.LOGIN) { inclusive = true }
-                } },
+                onLoginSucess = {
+                    navController.navigate(Destinations.HOME) {
+                        popUpTo(Destinations.LOGIN) { inclusive = true }
+                    }
+                },
                 onNavigateToSignup = { navController.navigate(Destinations.SIGNUP) }
             )
         }
@@ -57,17 +65,24 @@ fun NavGraph(
             HomeScreen(
                 viewModel = videoViewModel,
                 onNavigateToAddVideo = { navController.navigate(Destinations.CREATE_VIDEO) },
-                onNavigateToProfile = {navController.navigate(Destinations.PROFILE)},
-                onNavigateToMessages = {navController.navigate(Destinations.CONVERSATIONS)},
+                onNavigateToProfile = { navController.navigate(Destinations.PROFILE) },
+                onNavigateToMessages = { navController.navigate(Destinations.CONVERSATIONS) },
+                onShareVideo = { videoUrl ->
+                    // Encode the video URL safely for navigation (videoUrl is non-null)
+                    val encoded = if (videoUrl.isBlank()) "" else Uri.encode(videoUrl)
+                    navController.navigate(Destinations.shareVideo(encoded))
+                },
                 currentUsername = currentUser?.username ?: "Moi"
             )
         }
         composable(Destinations.PROFILE) {
             ProfileScreen(
                 userViewModel = userViewModel,
-                onHome = { navController.navigate(Destinations.HOME) {
-                    popUpTo(Destinations.PROFILE) { inclusive = true }
-                } },
+                onHome = {
+                    navController.navigate(Destinations.HOME) {
+                        popUpTo(Destinations.PROFILE) { inclusive = true }
+                    }
+                },
                 onAdd = { navController.navigate(Destinations.CREATE_VIDEO) },
                 onMessages = { navController.navigate(Destinations.CONVERSATIONS) },
                 onLogout = { navController.navigate(Destinations.LOGIN) }
@@ -79,13 +94,13 @@ fun NavGraph(
                 currentUsername = currentUser?.username ?: "Moi",
                 viewModel = videoViewModel,
                 onSaved = {
-                navController.navigate(Destinations.HOME) {
+                    navController.navigate(Destinations.HOME) {
                         popUpTo(Destinations.HOME) { inclusive = true }
                     }
                 },
-                onNavigateHome = { navController.navigate(Destinations.CREATE_VIDEO) },
-                onNavigateToProfile = {navController.navigate(Destinations.PROFILE)},
-                onNavigateToMessages = {navController.navigate(Destinations.CONVERSATIONS)}
+                onNavigateHome = { navController.navigate(Destinations.HOME) },
+                onNavigateToProfile = { navController.navigate(Destinations.PROFILE) },
+                onNavigateToMessages = { navController.navigate(Destinations.CONVERSATIONS) }
             )
 
         }
@@ -111,6 +126,50 @@ fun NavGraph(
             )
         }
 
+        // New conversation route with optional shared video param -> use ShareScreen
+        composable(
+            route = Destinations.SHARE_VIDEO_ROUTES,
+            arguments = listOf(navArgument("video") {
+                type = NavType.StringType; nullable = true; defaultValue = ""
+            })
+        ) { backStackEntry ->
+            val messagingViewModel: MessagingViewModel = viewModel()
+            val sharedVideo = backStackEntry.arguments?.getString("video")
+            ShareScreen(
+                currentUser?.username ?: "Moi",
+                sharedVideo,
+                { navController.popBackStack() },
+                { conversationId ->
+                    navController.navigate(Destinations.chat(conversationId)) {
+                        popUpTo(Destinations.CONVERSATIONS) { inclusive = false }
+                    }
+                },
+                viewModel = messagingViewModel
+            )
+        }
+
+        // Backwards-compatible route: some parts of the app may navigate to "share_video?video=..."
+        composable(
+            route = "share_video?video={video}",
+            arguments = listOf(navArgument("video") {
+                type = NavType.StringType; nullable = true; defaultValue = ""
+            })
+        ) { backStackEntry ->
+            val messagingViewModel: MessagingViewModel = viewModel()
+            val sharedVideo = backStackEntry.arguments?.getString("video")
+            ShareScreen(
+                currentUser?.username ?: "Moi",
+                sharedVideo,
+                { navController.popBackStack() },
+                { conversationId ->
+                    navController.navigate(Destinations.chat(conversationId)) {
+                        popUpTo(Destinations.CONVERSATIONS) { inclusive = false }
+                    }
+                },
+                viewModel = messagingViewModel
+            )
+        }
+
         composable(
             route = Destinations.CHAT,
             arguments = listOf(navArgument("conversationId") { type = NavType.StringType })
@@ -120,7 +179,7 @@ fun NavGraph(
             ChatScreen(
                 conversationId = conversationId,
                 currentUsername = currentUser?.username ?: "Moi",
-                onNavigateBack = { navController.popBackStack() },
+                onNavigateBack = { navController.navigate(Destinations.CONVERSATIONS) },
                 viewModel = messagingViewModel
             )
         }
@@ -128,14 +187,14 @@ fun NavGraph(
         composable(Destinations.NEW_CONVERSATION) {
             val messagingViewModel: MessagingViewModel = viewModel()
             NewConversationScreen(
-                currentUsername = currentUser?.username ?: "Moi",
-                onNavigateBack = { navController.popBackStack() },
-                onNavigateToChat = { conversationId ->
+                currentUser?.username ?: "Moi",
+                { navController.navigate(Destinations.CONVERSATIONS) },
+                { conversationId ->
                     navController.navigate(Destinations.chat(conversationId)) {
                         popUpTo(Destinations.CONVERSATIONS) { inclusive = false }
                     }
                 },
-                viewModel = messagingViewModel
+                messagingViewModel
             )
         }
     }
