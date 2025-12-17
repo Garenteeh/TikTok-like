@@ -6,12 +6,13 @@ export default {
     if (count > 200) count = 200;
 
     const videos = [];
+
     for (let i = 0; i < count; i++) {
       videos.push({
         id: crypto.randomUUID(),
-        url: randomVideo(),
+        url: await randomVideo(),
         title: "Video #" + i,
-       user: "User" + randomInt(1000),
+        user: "User" + randomInt(1000),
         likes: randomInt(10_000),
         shares: randomInt(1000),
         reposts: randomInt(500),
@@ -25,16 +26,50 @@ export default {
   }
 };
 
-function randomVideo() {
+const PEXELS_API_KEY = "FVrEEoR0dCL23mf7TCSZu4SnkuLpflJsh3jnoE93idllK3rV6gZr3MT0";
+
+async function randomVideo() {
+  const queries = ["people", "fun", "nature", "city", "technology"];
+  const query = queries[randomInt(queries.length)];
+  const page = randomInt(10) + 1;
+
+  try {
+    const res = await fetch(
+      `https://api.pexels.com/videos/search?query=${query}&per_page=5&page=${page}`,
+      {
+        headers: {
+          Authorization: PEXELS_API_KEY
+        }
+      }
+    );
+
+    const data = await res.json();
+
+    if (!data.videos || data.videos.length === 0) {
+      return fallbackVideo();
+    }
+
+    const video = data.videos[randomInt(data.videos.length)];
+
+    const file =
+      video.video_files.find(v => v.quality === "sd") ||
+      video.video_files.find(v => v.file_type === "video/mp4") ||
+      video.video_files[0];
+
+    return file.link;
+
+  } catch (e) {
+    return fallbackVideo();
+  }
+}
+
+function fallbackVideo() {
   const samples = [
     "https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-    "https://storage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
     "https://storage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4",
-    "https://storage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4",
-    "https://videos.pexels.com/video-files/854152/854152-hd_1280_720_24fps.mp4",
-    "https://videos.pexels.com/video-files/855017/855017-hd_1280_720_24fps.mp4"
+    "https://storage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4"
   ];
-  return samples[Math.floor(Math.random() * samples.length)];
+  return samples[randomInt(samples.length)];
 }
 
 function randomInt(max) {
@@ -48,7 +83,7 @@ function randomComments(depth = 0) {
 
   return Array.from({ length: commentsCount }, () => {
     const now = Date.now();
-    const randomPastTime = now - randomInt(7 * 24 * 60 * 60 * 1000); // random time in last 7 days
+    const randomPastTime = now - randomInt(7 * 24 * 60 * 60 * 1000);
 
     return {
       id: crypto.randomUUID(),
