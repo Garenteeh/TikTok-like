@@ -5,7 +5,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -54,46 +53,29 @@ fun NewConversationScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(
-                text = "Entrez le nom d'utilisateur de la personne avec qui vous souhaitez discuter :",
-                style = MaterialTheme.typography.bodyLarge
-            )
+            Text("Créer une nouvelle conversation:")
 
             OutlinedTextField(
                 value = username,
-                onValueChange = {
-                    username = it
-                    error = null
-                },
+                onValueChange = { username = it; error = null },
                 label = { Text("Nom d'utilisateur") },
                 placeholder = { Text("@username") },
-                modifier = Modifier.fillMaxWidth(),
-                enabled = !isCreating,
-                isError = error != null,
-                supportingText = if (error != null) {
-                    { Text(error!!, color = MaterialTheme.colorScheme.error) }
-                } else null
+                modifier = Modifier.fillMaxWidth()
             )
 
             Button(
                 onClick = {
                     if (username.isBlank()) {
-                        error = "Veuillez entrer un nom d'utilisateur"
-                        return@Button
+                        error = "Veuillez entrer un nom d'utilisateur"; return@Button
                     }
-
                     if (username.trim() == currentUsername) {
-                        error = "Vous ne pouvez pas démarrer une conversation avec vous-même"
-                        return@Button
+                        error =
+                            "Vous ne pouvez pas démarrer une conversation avec vous-même"; return@Button
                     }
-
                     isCreating = true
-                    viewModel.createOrOpenConversation(
-                        participantUsername = username.trim(),
-                        currentUsername = currentUsername
-                    ) { conversationId ->
+                    viewModel.createOrOpenConversation(username.trim(), currentUsername) { convId ->
                         isCreating = false
-                        onNavigateToChat(conversationId)
+                        onNavigateToChat(convId)
                     }
                 },
                 modifier = Modifier
@@ -101,29 +83,14 @@ fun NewConversationScreen(
                     .height(50.dp),
                 enabled = !isCreating && username.isNotBlank()
             ) {
-                if (isCreating) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(24.dp),
-                        color = Color.White
-                    )
-                } else {
-                    Text("Démarrer la conversation")
-                }
-            }
-
-            if (isCreating) {
-                LinearProgressIndicator(
-                    modifier = Modifier.fillMaxWidth()
+                if (isCreating) CircularProgressIndicator(modifier = Modifier.size(24.dp)) else Text(
+                    "Démarrer la conversation"
                 )
             }
 
-            Text(
-                text = "Note : L'utilisateur doit exister dans l'application pour pouvoir démarrer une conversation.",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                modifier = Modifier.padding(top = 8.dp)
-            )
+            if (isCreating) LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+
+            if (!error.isNullOrBlank()) Text(error!!, color = MaterialTheme.colorScheme.error)
         }
     }
 }
-
