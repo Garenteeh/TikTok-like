@@ -95,6 +95,22 @@ class VideoRepositoryImpl(
         }
     }
 
+    override suspend fun toggleRepost(videoId: String): Video? {
+        return try {
+            val video = videoDao.getVideoById(videoId) ?: return null
+            val newIsReposted = !video.isReposted
+            val newReposts = if (newIsReposted) video.reposts + 1 else video.reposts - 1
+
+            videoDao.updateRepostStatus(videoId, newIsReposted, newReposts)
+            Log.d("VideoRepositoryImpl", "Toggled repost for video $videoId: isReposted=$newIsReposted, reposts=$newReposts")
+
+            videoDao.getVideoById(videoId)?.toDomain()
+        } catch (e: Exception) {
+            Log.e("VideoRepositoryImpl", "Error toggling repost", e)
+            null
+        }
+    }
+
     override suspend fun createVideo(video: Video): Video? {
         return try {
             val videoEntity = video.toEntity()

@@ -163,10 +163,8 @@ fun ProfileScreen(
 
 fun formatPhoneNumber(raw: String): String {
     if (raw.isBlank()) return ""
-    // Ne garder que les chiffres
     val digits = raw.filter { it.isDigit() }
     if (digits.isEmpty()) return raw
-    // Grouper par 2 caractères et joindre par un espace
     return digits.chunked(2).joinToString(" ")
 }
 

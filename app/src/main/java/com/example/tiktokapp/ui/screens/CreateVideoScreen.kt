@@ -59,7 +59,6 @@ fun CreateVideoScreen(
         }
     }
 
-    // When pendingUri changes, clear the existing preview first then set the new uri
     LaunchedEffect(pendingUri) {
         val newUri = pendingUri
         if (newUri != null) {
@@ -102,7 +101,6 @@ fun CreateVideoScreen(
                         .background(Color.Black)
                 )
             } else {
-                // placeholder full-screen area
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -113,7 +111,6 @@ fun CreateVideoScreen(
                 }
             }
 
-            // Overlay controls: appear on top of the video, pinned to the top
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()

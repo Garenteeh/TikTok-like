@@ -21,7 +21,7 @@ import com.example.tiktokapp.data.db.entities.VideoEntity
         ConversationEntity::class,
         MessageEntity::class
     ],
-    version = 5,
+    version = 6,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {

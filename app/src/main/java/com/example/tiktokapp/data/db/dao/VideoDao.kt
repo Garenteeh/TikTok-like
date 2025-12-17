@@ -29,5 +29,8 @@ interface VideoDao {
 
     @Query("UPDATE videos SET isLiked = :isLiked, likes = :likes WHERE id = :videoId")
     suspend fun updateLikeStatus(videoId: String, isLiked: Boolean, likes: Int)
+
+    @Query("UPDATE videos SET isReposted = :isReposted, reposts = :reposts WHERE id = :videoId")
+    suspend fun updateRepostStatus(videoId: String, isReposted: Boolean, reposts: Int)
 }
 
