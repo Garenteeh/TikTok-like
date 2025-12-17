@@ -1,5 +1,6 @@
 package com.example.tiktokapp.ui.screens
 
+import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -24,6 +25,7 @@ import java.nio.charset.StandardCharsets
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.ui.platform.LocalContext
 import com.example.tiktokapp.domain.models.Conversation
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -171,6 +173,48 @@ fun ShareScreen(
                             shareError!!,
                             color = MaterialTheme.colorScheme.error
                         )
+                    }
+                }
+            }
+
+            // Section de partage externe (bouton unique qui ouvre le chooser ACTION_SEND)
+            Card(
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.05f)
+                ), modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(modifier = Modifier.padding(12.dp)) {
+                    Text("Partager en externe", fontWeight = FontWeight.Bold)
+
+                    val context = LocalContext.current
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Button(
+                            onClick = {
+                                // Construire le texte de partage avec l'URL décodée si présente
+                                val shareText = if (!decodedSharedVideo.isNullOrBlank()) {
+                                    "Check out this video: $decodedSharedVideo"
+                                } else {
+                                    "Check out this content"
+                                }
+
+                                // Intent standard ACTION_SEND -> chooser
+                                val sendIntent = Intent().apply {
+                                    action = Intent.ACTION_SEND
+                                    putExtra(Intent.EXTRA_TEXT, shareText)
+                                    type = "text/plain"
+                                }
+                                context.startActivity(Intent.createChooser(sendIntent, null))
+                            }, modifier = Modifier
+                                .padding(8.dp)
+                                .fillMaxWidth()
+                        ) {
+                            Text("Partage externe ")
+                            Icon(Icons.Filled.Share, contentDescription = "Partage externe")
+                        }
                     }
                 }
             }
